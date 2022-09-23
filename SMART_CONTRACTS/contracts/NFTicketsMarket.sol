@@ -33,10 +33,21 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 tokenId;
         string name;
         address payable seller;
-        address payable owner;
+        address payable owner; // ********* does the owner need to be payable? ********
         uint256 price;
         uint256 amount;
         bool onSale;
+        // ********* Need to add a total proceeds tracker to know how much in native token has actually been earned from the sales of this market item ********
+        // ********* Need to add a status flag to show if the MarketItem has been processed by the Keeper/DAO after the end timestamp has been reached ********
+        /* Possible status codes
+        0 Unprocessed
+        1 Seller paid (and most of listing fee refunded)
+        2 In dispute (complaint raised)
+        3 Porcessed - Dispute resolved in seller's favour - buyer penalised (can be automated or by DAO vote)
+        4 Porcessed - Dispute resolved in buyer's favour - seller penalised (can be automated or by DAO vote)
+        5 Dispute raised to DAO - await extra time
+        6 Porcessed - Refunded by seller - seller will need to select this once dispute is raised - most of the listing fee will be refunded to seller
+        */
     }
 
     struct MyItems {
@@ -63,6 +74,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // ********** Need to ensure the listing fee distribution methods are looked into **********
+    // ********** Need to add a require statement to ensure lister actually has the required tokens/tickets to list
     // This lists a new item onto the market - the seller must pay 20% fee calculated based of the per ticket price and number of tickets placed for sale
     function listNewMarketItem(address nftContract, uint256 tokenId, uint256 amount, bytes memory data, string memory name) public payable nonReentrant {
         require(msg.value == (getConversion(getPrice(nftContract, tokenId)) * amount / listingFee), "Listing fee must equal 20% of expected sales");
@@ -125,10 +137,10 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         require(idToMarketItem[itemId].amount > 0, "There are no more items to sell");
         require(msg.value == getConversion(idToMarketItem[itemId].price) * amount, "Please submit the asking price in order to complete the purchase");//updated with conversion
         NFTicketsToken temp = NFTicketsToken(nftContract);
-        idToMarketItem[itemId].seller.transfer(msg.value);
+        idToMarketItem[itemId].seller.transfer(msg.value); // payment should come to this contract for escrow - right now it pays directly to the seller
         temp.useUnderscoreTransfer(address(this), msg.sender, idToMarketItem[itemId].tokenId, amount, data);
         idToMarketItem[itemId].amount = idToMarketItem[itemId].amount - amount;
-        idToMarketItem[itemId].owner = payable(msg.sender);
+        idToMarketItem[itemId].owner = payable(msg.sender); // *********** This actually makes the buyer listed as the owner - but it only means they are the last buyer or the last to become an owner of this NFT - NEEDS LOOKING INTO
         if(idToMarketItem[itemId].amount == 0){
             _itemsSold.increment();
             idToMarketItem[itemId].onSale = false;
@@ -165,6 +177,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // ******** Need to check if the below description is accurate - does this function actually fail or does it return the market items that are owned by the msg.sender? **********
+    // ******** Need to update this because the owner field can be reset - should be checking using the balanceOf function of the IERC1155 standard i.e. balanceOf(msg.sender, MarketItem.tokenId)
     //This function will need to be rewritten as the owner field will no longer accurately reflect
     function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint totalItemCount = _itemIds.current();
@@ -221,7 +234,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             tokenId,
             name,
             payable(msg.sender),
-            payable(address(0)),
+            payable(address(0)), // ******** Need to check if this needs to be payable? *********
             getPrice(nftContract, tokenId), 
             newAmount,
             true
@@ -334,7 +347,16 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     /*
 
         FUNCTIONS TO BE ADDED:
-        1. payment hold
+        function to get the timestamp of the event from the NFT on IPFS - then to convert it into block time, then compare with current block time to ensure something can be done with the funds - perhaps using UNIX time? - this is impractical - need to use oracle ane extra gas for this, better off saving the event timestamp in the NFT and checking timestamp against current time
+
+        time delay should be something like this:
+        event lister inputs the time in the front end - this is converted using javascript into unix time > uint256 > bytes
+        that unix time is listed in the NFT in the data (bytes) paramter during the mint
+        future functions can use the timestamp vs now to ensure enough time has passed i.e. now > data (timestamp) + 86400 (24 hours)
+        if the above is true, then other function logic can be executed
+        best to also have a flag on the market item to ensure that it doens't get processed again and again.
+
+        1. payment hold - need to update the function: buyMarketItem line: idToMarketItem[itemId].seller.transfer(msg.value); payment should be placed into this contract for now and not paid directly to the seller
         2. payment distribution
         3. refund
         4. complaint raising - with fee
