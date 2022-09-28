@@ -37,9 +37,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 price;
         uint256 amount;
         bool onSale;
-        // ********* Need to add a total proceeds tracker to know how much in native token has actually been earned from the sales of this market item ********
-        // ********* Need to add a status flag to show if the MarketItem has been processed by the Keeper/DAO after the end timestamp has been reached ********
-        /* Possible status codes
+        uint8 status;
+        /* Status codes
         0 Unprocessed
         1 Seller paid (and most of listing fee refunded)
         2 In dispute (complaint raised)
@@ -59,6 +58,9 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     }
 
     mapping(uint256 => MarketItem) private idToMarketItem;
+    mapping(address => mapping(uint256 => uint256)) public addressToSpending; // Maps how much each address has spent on each item
+    mapping(address => mapping(uint256 => uint256)) public sellerToDepositPerItem; // Maps how much each seller has deposited per peach market item
+
 
     event MarketItemCreated (
         uint indexed itemId,
@@ -69,15 +71,18 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         address owner,
         uint256 price,
         uint256 amount, 
-        bool onSale
+        bool onSale,
+        uint8 status
     );
-    
+  
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // ********** Need to ensure the listing fee distribution methods are looked into **********
-    // ********** Need to add a require statement to ensure lister actually has the required tokens/tickets to list
     // This lists a new item onto the market - the seller must pay 20% fee calculated based of the per ticket price and number of tickets placed for sale
     function listNewMarketItem(address nftContract, uint256 tokenId, uint256 amount, bytes memory data, string memory name) public payable nonReentrant {
-        require(msg.value == (getConversion(getPrice(nftContract, tokenId)) * amount / listingFee), "Listing fee must equal 20% of expected sales");
+        //require(msg.value == (getConversion(getPrice(nftContract, tokenId)) * amount / listingFee), "Listing fee must equal 20% of expected sales"); // offline for testing
+        require(msg.value == (getPrice(nftContract, tokenId) * amount / listingFee), "Listing fee must equal 20% of expected sales");
+        NFTicketsToken temp = NFTicketsToken(nftContract);
+        require(temp.balanceOf(msg.sender, tokenId) >= amount, "You don't own enough for this sale");
 
         _itemIds.increment();
         uint256 itemId = _itemIds.current();
@@ -91,7 +96,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             payable(address(0)),
             getPrice(nftContract, tokenId), 
             amount,
-            true
+            true,
+            0
         );
 
         emit MarketItemCreated(
@@ -103,11 +109,21 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             address(0),
             getPrice(nftContract, tokenId),
             amount,
-            true
-        );
-
-        NFTicketsToken temp = NFTicketsToken(nftContract);
+            true,
+            0
+        );    
         temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
+        sellerToDepositPerItem[msg.sender][itemId] = addressToSpending[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
+    }
+
+    // Returns the total value spend by an address on a particular market item
+    function getSpend (address spender, uint256 marketItem) public view returns (uint256) {
+        return addressToSpending[spender][marketItem];
+    }
+
+    // Returns the total value deposited by a seller on a particular market item listing
+    function getDeposit (address depositor, uint256 marketItem) public view returns (uint256) {
+        return addressToSpending[depositor][marketItem];
     }
 
     // Returns the latests Native tocken price for cost conversion - i.e. 1 AVAX = XX.xx USD
@@ -129,15 +145,16 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         return conversion = _price * dataFeed * multiplier;
     }
 
-
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // Buys one or more tickets from the marketplace, ensuring there are enough tickets to buy, and the buyer is paying the asking price as per current native token to USD conversion.
     // ********* Payment is automatically paid the the tickets lister. This will need to be modified so that funds remain in escrow until keeper pays out the proceeds if there are no justified complaints *********
     function buyMarketItem (address nftContract, uint256 itemId, uint256 amount, bytes memory data) public payable nonReentrant {
         require(idToMarketItem[itemId].amount > 0, "There are no more items to sell");
-        require(msg.value == getConversion(idToMarketItem[itemId].price) * amount, "Please submit the asking price in order to complete the purchase");//updated with conversion
-        NFTicketsToken temp = NFTicketsToken(nftContract);
-        idToMarketItem[itemId].seller.transfer(msg.value); // payment should come to this contract for escrow - right now it pays directly to the seller
+        //require(msg.value == getConversion(idToMarketItem[itemId].price) * amount, "Please submit the asking price in order to complete the purchase");//testing with no conversion
+        require(msg.value == idToMarketItem[itemId].price * amount, "Please submit the asking price in order to complete the purchase");//updated with conversion
+        NFTicketsToken temp = NFTicketsToken(nftContract);        
+        //idToMarketItem[itemId].seller.transfer(msg.value); // payment should come to this contract for escrow - right now it pays directly to the seller - commenting out will need this functionality in the future
+        addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] + msg.value; // records how much was paid by a buyer/wallet for the item id
         temp.useUnderscoreTransfer(address(this), msg.sender, idToMarketItem[itemId].tokenId, amount, data);
         idToMarketItem[itemId].amount = idToMarketItem[itemId].amount - amount;
         idToMarketItem[itemId].owner = payable(msg.sender); // *********** This actually makes the buyer listed as the owner - but it only means they are the last buyer or the last to become an owner of this NFT - NEEDS LOOKING INTO
@@ -224,6 +241,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         require(idToMarketItem[findMarketItemId(nftContract, tokenId)].amount > 0, "This item has sold out, create a new listing");
         require(msg.sender == idToMarketItem[findMarketItemId(nftContract, tokenId)].seller, "Only the original seller can relist");
         require(msg.value == (getConversion(getPrice(nftContract, tokenId)) * amount / listingFee), "Listing fee must equal 20% of expected sales");// updated with conversion
+        NFTicketsToken temp = NFTicketsToken(nftContract);
+        require(temp.balanceOf(msg.sender, tokenId) >= amount, "You don't own enough for this sale");
 
         uint256 itemId = findMarketItemId(nftContract, tokenId);
         uint newAmount = idToMarketItem[itemId].amount + amount;
@@ -237,11 +256,12 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             payable(address(0)), // ******** Need to check if this needs to be payable? *********
             getPrice(nftContract, tokenId), 
             newAmount,
-            true
+            true,
+            0
         );
-        NFTicketsToken temp = NFTicketsToken(nftContract);
         temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
         //IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, data);  
+        sellerToDepositPerItem[msg.sender][itemId] = addressToSpending[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
     }
 
     // Returns the nominal price per ticket (i.e. how much it would be in a stable coin or USD)
@@ -356,12 +376,16 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         if the above is true, then other function logic can be executed
         best to also have a flag on the market item to ensure that it doens't get processed again and again.
 
-        1. payment hold - need to update the function: buyMarketItem line: idToMarketItem[itemId].seller.transfer(msg.value); payment should be placed into this contract for now and not paid directly to the seller
+        1. payment hold - DONE - the funds are now placed into this smart contract and await distribution - buyers funds are tracked to each item, and deposits by the seller too
         2. payment distribution
         3. refund
         4. complaint raising - with fee
         5. complaint processing
 
     */
+
+    //****** testing area ******
+
+    //****** testing area ******
     
 }
