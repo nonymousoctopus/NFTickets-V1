@@ -28,6 +28,7 @@ error NoSales(); // "No Sales"
 error NothingToRefund(); // "Nothing to refund"
 error NotDisputed(); // "Not in dispute"
 error NoBuyers(); // "No Buyers"
+error NotOwner();
 
 
 //contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder, NFTicketsUtilities {
@@ -44,8 +45,9 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     //AggregatorV3Interface internal priceFeed;
     
-    constructor() {
-        owner = payable(msg.sender); // This needs to be looked at - the owner is not used anywhere yet and should be a higher level contract
+    constructor(address _owner) {
+        //owner = payable(msg.sender); // This needs to be looked at - the owner is not used anywhere yet and should be a higher level contract
+        owner = payable(_owner);
         //priceFeed = AggregatorV3Interface(0x5498BB86BC934c8D34FDA08E81D444153d0D06aD); //Address of Oracle pricefeed - used to convert USD prices listed for each item into the native chain token price i.e. in AVAX
     }
 
@@ -425,7 +427,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     // Changes the status code of the market item - testing function only
     // ******* This function will need to become restricted to the DAO Timelock or keeper contract - _newStatus must refer to the decision from the DAO Governor / Controller *******
-    function changeStatus (uint256 _marketItem, uint8 _newStatus) public {
+    function changeStatus (uint256 _marketItem, uint8 _newStatus) public onlyOwner {
         if(_newStatus < 0 || _newStatus >= 7) { revert InvalidStatus();}
         idToMarketItem[_marketItem].status = _newStatus;
     }
@@ -433,14 +435,14 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // Sets market item to no longer on sale - need to update who can do this/when this happens
     // ******* The buyMarketItem need to check if sale is still running (if the current time is equal or greater than event finish time) but not execute this function if the current time is equal or greater than event finish time *******
     // ******* This must be restricted to DAO Timelock / keeper *******
-    function finishSale (uint256 _marketItem) public {
+    function finishSale (uint256 _marketItem) public onlyOwner {
         if(idToMarketItem[_marketItem].onSale != true) { revert NoLongerOnSale();}
         idToMarketItem[_marketItem].onSale = false;
     }
 
     //function to pay the seller - work out deposit refund, total sales, combine both and pay out, update deposit amount and sales amount to 0
     // ************* Need to make this onlyOwner ********
-    function paySellers () public payable nonReentrant{ 
+    function paySellers () public payable onlyOwner nonReentrant{ 
         uint totalItemCount = _itemIds.current();
         uint itemCount = 0;
         uint currentIndex = 0;
@@ -504,7 +506,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     */
 
     // Seller refunds all buyers for a market item - all spending records reset to 0
-    function sellerRefundAll (uint256 marketItem) public nonReentrant {
+    function sellerRefundAll (uint256 marketItem) public onlyOwner nonReentrant {
         if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
         if(idToMarketItem[marketItem].initialQuantity == idToMarketItem[marketItem].amount) { revert NoSales();}
         uint256 totalBuyers = marketItemIdToBuyers[marketItem].length;
@@ -547,7 +549,11 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         idToMarketItem[marketItem].name = string.concat("Refunded: ", idToMarketItem[marketItem].name);
     }
 
-
+    // Basic Access control
+    modifier onlyOwner {
+        if(msg.sender != owner) {revert NotOwner();}
+        _;
+    }
 
 
     // NEED TO ADD A FUNCTION TO RAISE DISPUTE
