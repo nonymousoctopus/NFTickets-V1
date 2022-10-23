@@ -4,13 +4,8 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-//import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
-
-import "./NFTicketsToken.sol";
-import "./NFTicketsMarket.sol";
+import "./NFTicketsTic.sol";
 import "./NFTicketsUtils.sol";
-//
 
 //Custom Errors
 error Not20PercentOfListing(); // "Listing fee must equal 20% of expected sales"
@@ -29,6 +24,7 @@ error NothingToRefund(); // "Nothing to refund"
 error NotDisputed(); // "Not in dispute"
 error NoBuyers(); // "No Buyers"
 error NotOwner();
+error AlreadyRefunded();
 
 
 //contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder, NFTicketsUtilities {
@@ -42,19 +38,14 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     //uint256 listingPrice = 1 ether;
     uint256 constant listingFee = 5; // used to divide the price an get to the percentage i.e. 20%
     uint256 constant successFee = 4; // used to divide the listing fees and chare the seller 5% in undisputed transactions
+    uint256 constant internal DAY = 86400;
 
-    //AggregatorV3Interface internal priceFeed;
+
+    NFTicketsUtils utils;
     
-    constructor(address _owner) {
+    constructor(address _owner, address _utils) {
         //owner = payable(msg.sender); // This needs to be looked at - the owner is not used anywhere yet and should be a higher level contract
         owner = payable(_owner);
-        //priceFeed = AggregatorV3Interface(0x5498BB86BC934c8D34FDA08E81D444153d0D06aD); //Address of Oracle pricefeed - used to convert USD prices listed for each item into the native chain token price i.e. in AVAX
-    }
-
-    // Adding Utilities functionality with less bytecode
-    NFTicketsUtils utils;
-    // Adding Utilities functionality with less bytecode
-    function Existing(address _utils) public {
         utils = NFTicketsUtils(_utils);
     }
 
@@ -69,7 +60,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 amount;
         uint256 initialQuantity;
         uint256 totalSales;
-        bool onSale;
+        //bool onSale;
         uint8 status;
         /* Status codes
         0 Unprocessed
@@ -80,6 +71,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         5 Dispute raised to DAO - await extra time
         6 Porcessed - Refunded by seller - seller will need to select this once dispute is raised - most of the listing fee will be refunded to seller
         */
+        uint256 finalCommision;
     }
 
     struct MyItems {
@@ -106,8 +98,9 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 amount,
         uint256 initialQuantity,
         uint256 totalSales,
-        bool onSale,
-        uint8 status
+        //bool onSale,
+        uint8 status,
+        uint256 finalCommision
     );
   
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
@@ -116,7 +109,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     function listNewMarketItem(address nftContract, uint256 tokenId, uint256 amount, bytes memory data, string memory name) public payable nonReentrant {
         //if(msg.value != (getConversion(utils.getPrice(nftContract, tokenId)) * amount / listingFee)) { revert Not20PercentOfListing();}  // offline for testing
         if(msg.value != (utils.getPrice(nftContract, tokenId) * amount / listingFee)) { revert Not20PercentOfListing();}
-        NFTicketsToken temp = NFTicketsToken(nftContract);
+        NFTicketsTic temp = NFTicketsTic(nftContract);
         if(temp.balanceOf(msg.sender, tokenId) < amount) { revert NotEnoughTokensForListing();}
 
         _itemIds.increment();
@@ -133,7 +126,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             amount,
             amount,
             0,
-            true,
+            //true,
+            0,
             0
         );
 
@@ -148,21 +142,16 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             amount,
             amount,
             0,
-            true,
+            //true,
+            0,
             0
         );    
         temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
         sellerToDepositPerItem[msg.sender][itemId] = sellerToDepositPerItem[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
     }
 
-    // Returns the total value spend by an address on a particular market item - needs to be come internal
-    /*
-    function getSpend (address spender, uint256 marketItem) public view returns (uint256) {
-        return addressToSpending[spender][marketItem];
-    }
-    */
 
-    // Returns the total value deposited by a seller on a particular market item listing - needs to be come internal
+    // Returns the total value deposited by a seller on a particular market item listing - needs to become internal
     function getDeposit (address depositor, uint256 marketItem) private view returns (uint256) {
         return sellerToDepositPerItem[depositor][marketItem];
     }
@@ -175,12 +164,14 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // Buys one or more tickets from the marketplace, ensuring there are enough tickets to buy, and the buyer is paying the asking price as per current native token to USD conversion.
     // ********* Payment is automatically paid the the tickets lister. This will need to be modified so that funds remain in escrow until keeper pays out the proceeds if there are no justified complaints *********
     function buyMarketItem (address nftContract, uint256 itemId, uint256 amount, bytes memory data) public payable nonReentrant {
-        if(idToMarketItem[itemId].onSale != true) { revert NoLongerOnSale();}
+        //if(idToMarketItem[itemId].onSale != true) { revert NoLongerOnSale();} // Need to replace the on sale flag
+        
         if(idToMarketItem[itemId].amount < amount) { revert NotEnoughItemsForSale();}
-        //if(msg.value != getConversion(idToMarketItem[itemId].price) * amount) { revert NotEnoughItemsFoeSale();} //testing with no conversion
+        //if(msg.value != getConversion(idToMarketItem[itemId].price) * amount) { revert NotEnoughItemsForSale();} //testing with no conversion
         if(msg.value != idToMarketItem[itemId].price * amount) { revert NotAskingPrice();}
 
-        NFTicketsToken temp = NFTicketsToken(nftContract);        
+        NFTicketsTic temp = NFTicketsTic(nftContract);    
+        if(temp.getFinishTime(idToMarketItem[itemId].tokenId) <= block.timestamp) { revert NoLongerOnSale();}    // this should replace the onsale flag
         //idToMarketItem[itemId].seller.transfer(msg.value); // payment should come to this contract for escrow - right now it pays directly to the seller - commenting out will need this functionality in the future
         addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] + msg.value; // records how much was paid by a buyer/wallet for the item id
         addBuyerToItem (itemId, msg.sender);
@@ -190,7 +181,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         idToMarketItem[itemId].owner = payable(msg.sender); // *********** This actually makes the buyer listed as the owner - but it only means they are the last buyer or the last to become an owner of this NFT - NEEDS LOOKING INTO
         if(idToMarketItem[itemId].amount == 0){
             _itemsSold.increment();
-            idToMarketItem[itemId].onSale = false;
+            //idToMarketItem[itemId].onSale = false; // ************ need to replace this with a different status code and also check if adding more listings needs to look at changing status code
         }
     }
 
@@ -212,7 +203,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
         MarketItem[] memory items = new MarketItem[](unsoldItemCount);
         for (uint i = 0; i < itemCount; i++) {
-            if (idToMarketItem[i + 1].onSale == true) {
+            NFTicketsTic temp = NFTicketsTic(idToMarketItem[i + 1].nftContract);
+            if (idToMarketItem[i + 1].status != 6 && temp.getFinishTime(idToMarketItem[i + 1].tokenId) < block.timestamp) {
                 uint currentId = i + 1;
                 MarketItem storage currentItem = idToMarketItem[currentId];
                 items[currentIndex] = currentItem;
@@ -271,7 +263,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         if(idToMarketItem[findMarketItemId(nftContract, tokenId)].amount == 0) { revert ItemSoldOut();}
         if(msg.sender != idToMarketItem[findMarketItemId(nftContract, tokenId)].seller) { revert NotOriginalSeller();}
         if(msg.value != (utils.getConversion(utils.getPrice(nftContract, tokenId)) * amount / listingFee)) { revert Not20PercentOfListing();}
-        NFTicketsToken temp = NFTicketsToken(nftContract);
+        NFTicketsTic temp = NFTicketsTic(nftContract);
         if(temp.balanceOf(msg.sender, tokenId) < amount) { revert NotEnoughTokensForListing();}
 
         uint256 itemId = findMarketItemId(nftContract, tokenId);
@@ -289,22 +281,14 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             newAmount,
             updatedQuantity,
             idToMarketItem[itemId].totalSales,
-            true,
+            //true,
+            0,
             0
         );
         temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
         //IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, data);  
         sellerToDepositPerItem[msg.sender][itemId] = sellerToDepositPerItem[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
     }
-
-    // Returns the nominal price per ticket (i.e. how much it would be in a stable coin or USD)
-    /*
-    function getPrice(address nftContract, uint256 tokenId) internal view returns (uint256) {
-        NFTicketsToken temp = NFTicketsToken(nftContract);
-        uint256 tempPrice = temp.price(tokenId); 
-        return tempPrice;
-    }
-    */
 
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // ******** Is the below comment still relevant? ********
@@ -317,7 +301,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint currentIndex = 0;
     
         for (uint i = 0; i < totalItemCount; i++) {
-            NFTicketsToken temp = NFTicketsToken(idToMarketItem[i +1].nftContract); 
+            NFTicketsTic temp = NFTicketsTic(idToMarketItem[i +1].nftContract); 
             if (temp.balanceOf(user, idToMarketItem[i + 1].tokenId) > 0) {
                 itemCount += 1;
             }
@@ -325,7 +309,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
         MyItems[] memory personalItems = new MyItems[](itemCount);
         for (uint i = 0; i < totalItemCount; i++) {
-            NFTicketsToken temp = NFTicketsToken(idToMarketItem[i +1].nftContract); 
+            NFTicketsTic temp = NFTicketsTic(idToMarketItem[i +1].nftContract); 
             if (temp.balanceOf(user, idToMarketItem[i + 1].tokenId) > 0) {
                 uint currentId = i + 1;
                 MarketItem storage currentItem = idToMarketItem[currentId];
@@ -356,7 +340,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
         //This is the address used for testing that is being checked - will actually be list of NFT owners in real app
         //address _testAddress = 0xc88Ad52065A113EbE503a4Cb6bCcE02B4802c264;
-        NFTicketsToken temp = NFTicketsToken(nftContract);
+        NFTicketsTic temp = NFTicketsTic(nftContract);
         _result = "Not on the list";
         if (temp.balanceOf(_signer, idToMarketItem[_itemId].tokenId) > 0 && (recoverSigner(ethSignedMessageHash, signature) == _signer)) {
             _result = "On the list";
@@ -397,30 +381,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-    /*
-
-        FUNCTIONS TO BE ADDED:
-        function to get the timestamp of the event from the NFT on IPFS - then to convert it into block time, then compare with current block time to ensure something can be done with the funds - perhaps using UNIX time? - this is impractical - need to use oracle ane extra gas for this, better off saving the event timestamp in the NFT and checking timestamp against current time
-
-        time delay should be something like this:
-        event lister inputs the time in the front end - this is converted using javascript into unix time > uint256 > bytes
-        that unix time is listed in the NFT in the data (bytes) paramter during the mint
-        future functions can use the timestamp vs now to ensure enough time has passed i.e. now > data (timestamp) + 86400 (24 hours)
-        if the above is true, then other function logic can be executed
-        best to also have a flag on the market item to ensure that it doens't get processed again and again.
-
-        1. payment hold - DONE - the funds are now placed into this smart contract and await distribution - buyers funds are tracked to each item, and deposits by the seller too
-        2. payment distribution - DONE full to sellers
-        3. refund - done
-        4. complaint raising - with fee
-        5. complaint processing
-
-    */
-
-    //****** testing area ******
-
     // Works out Deposit to refund in undisputed transactions
-    
     function depositRefundAmount (address _depositor, uint256 _marketItem) private view returns (uint256) {
         return getDeposit(_depositor, _marketItem) - (getDeposit(_depositor, _marketItem) / successFee);
     }
@@ -435,49 +396,67 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // Sets market item to no longer on sale - need to update who can do this/when this happens
     // ******* The buyMarketItem need to check if sale is still running (if the current time is equal or greater than event finish time) but not execute this function if the current time is equal or greater than event finish time *******
     // ******* This must be restricted to DAO Timelock / keeper *******
+    // ******* This function may be able to be deleted now that the buy function checks the current block time agains the sale finish time *******
+    /*
     function finishSale (uint256 _marketItem) public onlyOwner {
         if(idToMarketItem[_marketItem].onSale != true) { revert NoLongerOnSale();}
         idToMarketItem[_marketItem].onSale = false;
     }
+    */
 
     //function to pay the seller - work out deposit refund, total sales, combine both and pay out, update deposit amount and sales amount to 0
     // ************* Need to make this onlyOwner ********
-    function paySellers () public payable onlyOwner nonReentrant{ 
+    function paySellers () external payable onlyOwner nonReentrant{ 
         uint totalItemCount = _itemIds.current();
         uint itemCount = 0;
         uint currentIndex = 0;
 
+        uint256 marketComission = 0;
+
         // Determine how many items there are to be processed
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToMarketItem[i + 1].onSale == false && (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6)) { // check to make sure the item is no longer on sale // check to make sure the item is not in dispute - this needs to be updated to include status codes 3 & 6
+            //if (idToMarketItem[i + 1].onSale == false && (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6)) { // check to make sure the item is no longer on sale // check to make sure the item is not in dispute - this needs to be updated to include status codes 3 & 6
+            if (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6) { // check to make sure the item is no longer on sale // check to make sure the item is not in dispute 
                 itemCount += 1;
             }
         }
 
         // Create an array of only the item ids that need to be processed at this time
         uint256[] memory itemsForProcessing = new uint256[](itemCount);
+
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToMarketItem[i + 1].onSale == false && (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6)) {
-                itemsForProcessing[currentIndex] = idToMarketItem[i + 1].itemId;
-                currentIndex += 1;
+            //if (idToMarketItem[i + 1].onSale == false && (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6)) {
+            if (idToMarketItem[i + 1].status == 0 || idToMarketItem[i + 1].status == 3 || idToMarketItem[i + 1].status == 6) {
+                NFTicketsTic temp = NFTicketsTic(idToMarketItem[i + 1].nftContract);
+                if((temp.getFinishTime(idToMarketItem[i + 1].tokenId) + DAY) < block.timestamp) {
+                    itemsForProcessing[currentIndex] = idToMarketItem[i + 1].itemId;
+                    currentIndex += 1;
+                }
+                // if( idToMarketItem[i + 1].itemId is 1 day past finishsale date)
+                //itemsForProcessing[currentIndex] = idToMarketItem[i + 1].itemId;
+                //currentIndex += 1;
             }
         }
     
         for (uint i = 0; i < itemCount; i++) {
             uint256 owedToSeller = idToMarketItem[itemsForProcessing[i]].totalSales + depositRefundAmount(idToMarketItem[itemsForProcessing[i]].seller, itemsForProcessing[i]); // Add up all sales for this item with the deposit amount to be refunded
+            idToMarketItem[itemsForProcessing[i]].finalCommision = getDeposit(idToMarketItem[itemsForProcessing[i]].seller, itemsForProcessing[i]) / successFee; // record commision for this time
+            marketComission = marketComission + (getDeposit(idToMarketItem[itemsForProcessing[i]].seller, itemsForProcessing[i]) / successFee); // adds up the 5% market commision fees that can be transfered out in the round
             idToMarketItem[itemsForProcessing[i]].totalSales = 0; // Clear out total sales figure
             sellerToDepositPerItem[idToMarketItem[itemsForProcessing[i]].seller][itemsForProcessing[i]] = 0; // Clear out deposits figure
             idToMarketItem[itemsForProcessing[i]].seller.transfer(owedToSeller); // Transfer ballance owed to the seller (5% commision has be subtracted)           
             idToMarketItem[itemsForProcessing[i]].status = 1; // Set the market item status to processed so it won't be looked at again - this line is causing the issue but it seems to only mark the paid ones as processed ???
         }
+        (bool sent, bytes memory data) = owner.call{value: marketComission}(""); // Send the 5% comission to the owner (arbitration contract) for distribution
+        require(sent, "Failed to send Ether");
     }
 
     // Checks the status id of a market item ( 0 Unprocessed, 1 Seller paid, 2 In dispute, 3 Porcessed - Dispute resolved in seller's favour, 4 Porcessed - Dispute resolved in buyer's favour, 5 Dispute raised to DAO, 6 Porcessed.
-    /*
-    function checkStatus (uint256 itemId) public view returns (uint8) {
-        return idToMarketItem[itemId].status;
-    }
-    */
+    
+    //function checkComission (uint256 itemId) public view returns (uint8, uint256) {
+    //    return (idToMarketItem[itemId].status, idToMarketItem[itemId].finalCommision);
+    //}
+    
 
     // Adds the buyers wallet address to array of buyers of that Market Item
     function addBuyerToItem (uint256 marketItem, address buyer) internal {
@@ -498,15 +477,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         }
     }
 
-    // Returns all addresses of buyers of a market item - making this private saves on contract size
-    /*
-    function checkBuyers (uint256 marketItem) public view returns (address[] memory) {
-        return marketItemIdToBuyers[marketItem];
-    }
-    */
-
     // Seller refunds all buyers for a market item - all spending records reset to 0
-    function sellerRefundAll (uint256 marketItem) public onlyOwner nonReentrant {
+    function sellerRefundAll (uint256 marketItem) public nonReentrant {
         if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
         if(idToMarketItem[marketItem].initialQuantity == idToMarketItem[marketItem].amount) { revert NoSales();}
         uint256 totalBuyers = marketItemIdToBuyers[marketItem].length;
@@ -518,14 +490,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         idToMarketItem[marketItem].status = 6;
     }
 
-    // Seller refunds one buyer for a market item - buyer's spending records reset to 0, does not refund other buyers 
-    //function sellerRefundOne (uint256 marketItem, address buyer) public nonReentrant {
-    //    if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
-    //   if(addressToSpending[buyer][marketItem] <= 0) { revert NothingToRefund();}
-    //    payable(buyer).transfer(addressToSpending[buyer][marketItem]);
-    //    addressToSpending[buyer][marketItem] = 0;  
-    //}
-
     function sellerRefundOne (uint256 marketItem, address buyer) public nonReentrant {
         if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
         utils.sellerRefundOneUtils(marketItem, buyer);
@@ -534,17 +498,23 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     // DAO Timelock / Keeper slashed seller's deposit, half goes to DAO, half gets distributed to buyers in proportion, all payments refunded
     // ******* Need to make this something only the DAO Timelock/Keeper can implement after a vote
-    function refundWithPenalty (uint256 marketItem) public nonReentrant {
+    // ******* Need to update this to only take 5% for the dao each time *******
+    function refundWithPenalty (uint256 marketItem) public onlyOwner nonReentrant {
         if(idToMarketItem[marketItem].status != 4) { revert NotDisputed();}
         if(marketItemIdToBuyers[marketItem].length <= 0) { revert NoBuyers();}
+        if(idToMarketItem[marketItem].finalCommision > 0) { revert AlreadyRefunded();}
 
-        uint256 depositShare = (getDeposit(idToMarketItem[marketItem].seller, marketItem) / 2) / marketItemIdToBuyers[marketItem].length; // works out share of total deposit - in this event the seller forfits their entire deposit amount - half to DAO and half to buyers
-        
+        uint256 depositShare = (getDeposit(idToMarketItem[marketItem].seller, marketItem) / 4 * 3) / marketItemIdToBuyers[marketItem].length; // works out share of total deposit - in this event the seller forfits their entire deposit amount - quarter to DAO and the rest to buyers
+        uint256 marketComission = getDeposit(idToMarketItem[marketItem].seller, marketItem) / 4; //Works out 5% of the deposit as market comission
+        idToMarketItem[marketItem].finalCommision = marketComission;
+
         uint256 totalBuyers = marketItemIdToBuyers[marketItem].length;
         for (uint i = 0; i < totalBuyers; i++){
             payable(marketItemIdToBuyers[marketItem][i]).transfer(addressToSpending[marketItemIdToBuyers[marketItem][i]][marketItem] + depositShare);
             addressToSpending[marketItemIdToBuyers[marketItem][i]][marketItem] = 0;
         }
+        (bool sent, bytes memory data) = owner.call{value: marketComission}(""); // Send comission to the owner (arbitration contract)
+        require(sent, "Failed to send Ether");
         sellerToDepositPerItem[idToMarketItem[marketItem].seller][marketItem] = 0;
         idToMarketItem[marketItem].name = string.concat("Refunded: ", idToMarketItem[marketItem].name);
     }
@@ -555,8 +525,15 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         _;
     }
 
+    function getTokenByMarketId (uint256 _itemId) public view returns (uint256) {
+        return idToMarketItem[_itemId].tokenId;
+    }
 
-    // NEED TO ADD A FUNCTION TO RAISE DISPUTE
+    function getTotalSalesByMarketId (uint256 _itemId) public view returns (uint256) {
+        return (idToMarketItem[_itemId].initialQuantity - idToMarketItem[_itemId].amount);
+    }
+
+
     //****** testing area ******
     
 }
