@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox")
 require('hardhat-contract-sizer')
+require('hardhat-deploy')
+require("@nomiclabs/hardhat-ethers")
 require("dotenv").config()
 
 const MAINNET_RPC_URL =
@@ -10,7 +12,9 @@ const POLYGON_MAINNET_RPC_URL =
     process.env.POLYGON_MAINNET_RPC_URL || "https://polygon-mainnet.alchemyapi.io/v2/your-api-key"
 const GOERLI_RPC_URL =
     process.env.GOERLI_RPC_URL || "https://eth-goerli.alchemyapi.io/v2/your-api-key"
+const AVALANCHE_FUJI_TESTNET_RPC_URL = process.env.AVALANCHE_FUJI_TESTNET_RPC_URL
 const PRIVATE_KEY = process.env.PRIVATE_KEY
+const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY
 // optional
 const MNEMONIC = process.env.MNEMONIC || "Your mnemonic"
 const FORKING_BLOCK_NUMBER = process.env.FORKING_BLOCK_NUMBER
@@ -33,12 +37,6 @@ module.exports = {
                     details: { yul: false},
                   },
                 },
-            },
-            {
-                version: "0.6.6",
-            },
-            {
-                version: "0.4.24",
             },
         ],
     },
@@ -77,6 +75,11 @@ module.exports = {
             accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
             chainId: 137,
         },
+        fuji: {
+          url: AVALANCHE_FUJI_TESTNET_RPC_URL,
+          accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+          chainId: 43113,
+      },
     },
     defaultNetwork: "hardhat",
     etherscan: {
@@ -84,6 +87,9 @@ module.exports = {
         apiKey: {
             polygon: POLYGONSCAN_API_KEY,
             goerli: ETHERSCAN_API_KEY,
+            avalancheFujiTestnet: SNOWTRACE_API_KEY,
+            fuji: SNOWTRACE_API_KEY,
+
         },
     },
     gasReporter: {
@@ -112,4 +118,9 @@ module.exports = {
     mocha: {
         timeout: 200000, // 200 seconds max for running tests
     },
+    namedAccounts: {
+      deployer: {
+          default: 0, // here this will by default take the first account as deployer
+      },
+  },
 }

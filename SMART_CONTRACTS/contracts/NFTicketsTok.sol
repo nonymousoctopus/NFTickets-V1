@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 
 contract NFTicketsTok is ERC20Snapshot {
-    uint256 public constant s_maxSupply = 1000000000000000000000000;
+    uint256 public constant s_maxSupply = 1000000000000000000000000; // 1 million tokens
     constructor () 
     ERC20("NFTicketsToken", "NFTK") 
 
@@ -23,8 +23,4 @@ contract NFTicketsTok is ERC20Snapshot {
     function getSnapshot() public view returns (uint256) {
         return _getCurrentSnapshotId();
     }
-
-    /*
-        Need to make the name and Symbol set via constructor
-    */
 }
