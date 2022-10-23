@@ -8,3 +8,6 @@ This repo will focus on improving the NFTickets dapp initially designed during t
 - Improvements of the Android version of the app
 - Development of event verification and complaints functionality, leveraging IPFS/Filecoin for evidence storage
 - Documentation and user guides
+
+Deploying SMART_CONTRACTS:
+npx hardhat deploy --network fuji

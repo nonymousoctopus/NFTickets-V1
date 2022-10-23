@@ -48,13 +48,8 @@ contract NFTicketsUtils is ReentrancyGuard, Ownable {
     }   
 
     function sellerRefundOneUtils (uint256 marketItem, address buyer) public nonReentrant { //This used to be nonRentrant
-        //if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
-        //return publishedContract.tests(caller, tokenId);
         if(market.addressToSpending(buyer, marketItem) <= 0) { revert NothingToRefundHere();}
-        //if(addressToSpending[buyer][marketItem] <= 0) { revert NothingToRefund();}
         payable(buyer).transfer(market.addressToSpending(buyer, marketItem));
-        //addressToSpending[buyer][marketItem] = 0;  
-        //market.addressToSpending(buyer, marketItem) = 0;
     }
 
     function getCurrentTime () public view returns (uint) {

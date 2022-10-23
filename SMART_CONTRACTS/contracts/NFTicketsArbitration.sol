@@ -77,13 +77,9 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
 
     // ******* Need to add a payment for lodging dispute? *******
     function lodgeDispute(uint256 _itemId, int64 _disputerLat, int64 _disputerLon, uint256 _disputerTime, string memory _disputerEvidence) public nonReentrant {
-    //    if(TICKET.balanceOf(msg.sender, MARKET.getTokenByMarketId(_itemId)) == 0) { revert NoTicketForThisEvent();}
-    //    if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) - DAY) > block.timestamp) { revert CannotDisputeEventBeforeStart();}
-    //    if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) + DAY) < block.timestamp) { revert CannotDisputeFinalizedEvent();}
-
-        require(TICKET.balanceOf(msg.sender, MARKET.getTokenByMarketId(_itemId)) != 0, "No ticket");
-        require((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) - DAY) < block.timestamp, "2");
-        require((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) + DAY) > block.timestamp, "3");
+        if(TICKET.balanceOf(msg.sender, MARKET.getTokenByMarketId(_itemId)) == 0) { revert NoTicketForThisEvent();}
+        if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) - DAY) > block.timestamp) { revert CannotDisputeEventBeforeStart();}
+        if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) + DAY) < block.timestamp) { revert CannotDisputeFinalizedEvent();}
         // **** need to check that the dispute is being raised within a reasonable distance from the event location ****
         // cycle through existing disputes to make sure  there isn't already one fo this item
         if(disputeIndex == 0) {
@@ -141,42 +137,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         return disputes[_disputeId];
     }
 
-    
-    function oldVote (uint256 _disputeId, uint8 _choice) public nonReentrant {
-        if(_disputeId > disputeIndex) { revert DisputeDoesNotExist();}
-        if((TICKET.getFinishTime(MARKET.getTokenByMarketId(disputes[_disputeId].itemId)) + (4 * DAY)) < block.timestamp) { revert VotingFinished();}
-        if(disputeToDecisions[_disputeId].outcome == 2) { revert InsificientDisputeEveidence();}
-        if(TOKEN.balanceOfAt(msg.sender, getSnapshotOfDispute(_disputeId)) < 1000000000000000000) { revert InsuficientBalanceToVote();}
-        if(_choice == 0 || _choice > 2) { revert InvalidChoice();}
-        
-        uint256 voters = disputeToDecisions[_disputeId].voter.length;
-        
-        for (uint i = 0; i < (voters); i++){
-            if (disputeToDecisions[_disputeId].voter[i] == msg.sender) {
-                disputeToDecisions[_disputeId].decision[i] = _choice;
-            } else {
-                 disputeToDecisions[_disputeId].voter.push(msg.sender);
-                 disputeToDecisions[_disputeId].decision.push(_choice);
-            }
-        }
-        // Adding voter to struct for distributiuon tracking
-        if(voterCount == 0) {
-            voterToBallance[voterCount].voterAddress=msg.sender;
-            voterCount = voterCount + 1;
-        } else {
-            bool existingVoter = false;
-            for (uint i = 0; i < voterCount; i++){
-                if(voterToBallance[i].voterAddress == msg.sender) {
-                    existingVoter = true;
-                } 
-            }
-            if(existingVoter == false) {
-                voterToBallance[voterCount].voterAddress=msg.sender;
-                voterCount = voterCount + 1;
-            }
-        }
-    }
-
     // Captures votes from anyone with the balance to vote at the time of dispute being lodged
     // 1 = for buyer
     // 2 = for seller
@@ -218,10 +178,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         }
     }
 
-
-    //uint256 public voteB;
-    //uint256 public voteS;
-
     function checkVoterDecision (uint256 dispute, uint256 voter) public view returns (uint8) {
         return disputeToDecisions[dispute].decision[voter];
     }
@@ -240,10 +196,8 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         for (uint i = 0; i < voters; i++){
             if (disputeToDecisions[_disputeId].decision[i] == 1) {
                 votesForBuyer = votesForBuyer + 1;
-                //voteB = voteB + 1;
             } else {
                 votesForSeller = votesForSeller +1;
-                //voteS = voteS +1;
             }
         }
 
@@ -253,7 +207,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
             disputeToDecisions[_disputeId].outcome = 2;
         }
     }
-    //uint8 public AAA;
 
     // this should be called by the keeper functionality
     // ***** need to make this executed by the keeper only ****
@@ -261,13 +214,10 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         for (uint i = 0; i < disputeIndex; i++) {
             voteCount(i);
             if (disputeToDecisions[i].processingStatus == false) {
-                //AAA = 5;
                 if (disputeToDecisions[i].outcome == 1) {
-                    //AAA = 6;
                     MARKET.changeStatus(disputes[i].itemId, 4); // in buyer's favour
                     MARKET.refundWithPenalty(disputes[i].itemId);
                 } else {
-                    //AAA = 7;
                     MARKET.changeStatus(disputes[i].itemId, 3); // in seller's favour
                     MARKET.paySellers();
                 }
@@ -301,27 +251,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
             }
         }
     }
-
-    //function AAArefundwithPenalty (uint256 dispute) public {
-    //    MARKET.refundWithPenalty(disputes[dispute].itemId);
-    //}
-
-    // This should be called by the keeper functionality every so often
-    // ***** need to make this executed by the keeper only ****
-    // ***** This seems to be where is failed ***** Need a function to show what the outcome was to continue tracking - function showDecisions()... - there is no revert or an else and no way to check the decisions now
-    /*
-    function isVoteNeeded () public {
-        for (uint i = 0; i < disputeIndex; i++) {
-            if (disputeToDecisions[i].outcome == 0 || disputeToDecisions[i].outcome == 1) { // checks to see if the voting outcome so far is neutral/not voted or in favour of the buyer if yes proceeds to next check
-                if ((TICKET.getFinishTime(MARKET.getTokenByMarketId(disputes[i].itemId)) + DAY) < block.timestamp) { // checks if one day has passed after sales have finished - if yes proceeds to next check
-                    if (disputes[i].disputers.length <= ((MARKET.getTotalSalesByMarketId(disputes[i].itemId)) / 20)) { // ensures 5% dispute minimum is reached, if not, automatically rules in favour of seller
-                        disputeToDecisions[i].outcome = 2;
-                    }
-                } 
-            }
-        }
-    }
-    */
 
     // Owner functions: 
 
@@ -378,8 +307,5 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         voterBalanceUpdate(msg.value);
     }
     
-    // Need a distribution fuinction that will after 7 days, check the statuses of the
-
     // Everytime you vote, you get added to the list of voters, everytime money arrives, you get it distributed to all voters, as per their holdings at the current snapshot
-    // Need to add receive() function
 }

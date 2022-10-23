@@ -154,11 +154,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // Returns the total value deposited by a seller on a particular market item listing - needs to become internal
     function getDeposit (address depositor, uint256 marketItem) private view returns (uint256) {
         return sellerToDepositPerItem[depositor][marketItem];
-    }
-
-    // Returns the latests Native tocken price for cost conversion - i.e. 1 AVAX = XX.xx USD
-    
-   
+    }      
 
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // Buys one or more tickets from the marketplace, ensuring there are enough tickets to buy, and the buyer is paying the asking price as per current native token to USD conversion.
@@ -290,10 +286,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         sellerToDepositPerItem[msg.sender][itemId] = sellerToDepositPerItem[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
     }
 
-    // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
-    // ******** Is the below comment still relevant? ********
-    //fetch market items needs to be rewritten as it resets to all zeroes 
-
     // Runs through all listings on the market and checks how many belong to the user
     function fetchUserNFTs(address user) public view returns (MyItems[] memory) {
         uint totalItemCount = _itemIds.current();
@@ -393,17 +385,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         idToMarketItem[_marketItem].status = _newStatus;
     }
 
-    // Sets market item to no longer on sale - need to update who can do this/when this happens
-    // ******* The buyMarketItem need to check if sale is still running (if the current time is equal or greater than event finish time) but not execute this function if the current time is equal or greater than event finish time *******
-    // ******* This must be restricted to DAO Timelock / keeper *******
-    // ******* This function may be able to be deleted now that the buy function checks the current block time agains the sale finish time *******
-    /*
-    function finishSale (uint256 _marketItem) public onlyOwner {
-        if(idToMarketItem[_marketItem].onSale != true) { revert NoLongerOnSale();}
-        idToMarketItem[_marketItem].onSale = false;
-    }
-    */
-
     //function to pay the seller - work out deposit refund, total sales, combine both and pay out, update deposit amount and sales amount to 0
     // ************* Need to make this onlyOwner ********
     function paySellers () external payable onlyOwner nonReentrant{ 
@@ -432,9 +413,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
                     itemsForProcessing[currentIndex] = idToMarketItem[i + 1].itemId;
                     currentIndex += 1;
                 }
-                // if( idToMarketItem[i + 1].itemId is 1 day past finishsale date)
-                //itemsForProcessing[currentIndex] = idToMarketItem[i + 1].itemId;
-                //currentIndex += 1;
             }
         }
     
@@ -449,14 +427,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         }
         (bool sent, bytes memory data) = owner.call{value: marketComission}(""); // Send the 5% comission to the owner (arbitration contract) for distribution
         require(sent, "Failed to send Ether");
-    }
-
-    // Checks the status id of a market item ( 0 Unprocessed, 1 Seller paid, 2 In dispute, 3 Porcessed - Dispute resolved in seller's favour, 4 Porcessed - Dispute resolved in buyer's favour, 5 Dispute raised to DAO, 6 Porcessed.
-    
-    //function checkComission (uint256 itemId) public view returns (uint8, uint256) {
-    //    return (idToMarketItem[itemId].status, idToMarketItem[itemId].finalCommision);
-    //}
-    
+    } 
 
     // Adds the buyers wallet address to array of buyers of that Market Item
     function addBuyerToItem (uint256 marketItem, address buyer) internal {
@@ -533,7 +504,4 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         return (idToMarketItem[_itemId].initialQuantity - idToMarketItem[_itemId].amount);
     }
 
-
-    //****** testing area ******
-    
 }
