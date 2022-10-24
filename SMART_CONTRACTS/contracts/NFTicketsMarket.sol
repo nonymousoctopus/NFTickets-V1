@@ -35,7 +35,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     Counters.Counter public _itemsSold;
 
     address payable immutable owner; // The contract owner is going to remain unchanged
-    //uint256 listingPrice = 1 ether;
     uint256 constant listingFee = 5; // used to divide the price an get to the percentage i.e. 20%
     uint256 constant successFee = 4; // used to divide the listing fees and chare the seller 5% in undisputed transactions
     uint256 constant internal DAY = 86400;
@@ -44,7 +43,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     NFTicketsUtils utils;
     
     constructor(address _owner, address _utils) {
-        //owner = payable(msg.sender); // This needs to be looked at - the owner is not used anywhere yet and should be a higher level contract
         owner = payable(_owner);
         utils = NFTicketsUtils(_utils);
     }
@@ -55,12 +53,11 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 tokenId;
         string name;
         address payable seller;
-        address payable owner; // ********* does the owner need to be payable? ********
+        address payable owner; 
         uint256 price;
         uint256 amount;
         uint256 initialQuantity;
         uint256 totalSales;
-        //bool onSale;
         uint8 status;
         /* Status codes
         0 Unprocessed
@@ -98,7 +95,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         uint256 amount,
         uint256 initialQuantity,
         uint256 totalSales,
-        //bool onSale,
         uint8 status,
         uint256 finalCommision
     );
@@ -107,8 +103,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // ********** Need to ensure the listing fee distribution methods are looked into **********
     // This lists a new item onto the market - the seller must pay 20% fee calculated based of the per ticket price and number of tickets placed for sale
     function listNewMarketItem(address nftContract, uint256 tokenId, uint256 amount, bytes memory data, string memory name) public payable nonReentrant {
-        //if(msg.value != (getConversion(utils.getPrice(nftContract, tokenId)) * amount / listingFee)) { revert Not20PercentOfListing();}  // offline for testing
-        if(msg.value != (utils.getPrice(nftContract, tokenId) * amount / listingFee)) { revert Not20PercentOfListing();}
+        if(msg.value != (utils.getConversion(utils.getPrice(nftContract, tokenId)) * amount / listingFee)) { revert Not20PercentOfListing();}  // offline for testing
+        //if(msg.value != (utils.getPrice(nftContract, tokenId) * amount / listingFee)) { revert Not20PercentOfListing();}
         NFTicketsTic temp = NFTicketsTic(nftContract);
         if(temp.balanceOf(msg.sender, tokenId) < amount) { revert NotEnoughTokensForListing();}
 
@@ -126,7 +122,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             amount,
             amount,
             0,
-            //true,
             0,
             0
         );
@@ -142,7 +137,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             amount,
             amount,
             0,
-            //true,
             0,
             0
         );    
@@ -158,13 +152,10 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     // !*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
     // Buys one or more tickets from the marketplace, ensuring there are enough tickets to buy, and the buyer is paying the asking price as per current native token to USD conversion.
-    // ********* Payment is automatically paid the the tickets lister. This will need to be modified so that funds remain in escrow until keeper pays out the proceeds if there are no justified complaints *********
     function buyMarketItem (address nftContract, uint256 itemId, uint256 amount, bytes memory data) public payable nonReentrant {
-        //if(idToMarketItem[itemId].onSale != true) { revert NoLongerOnSale();} // Need to replace the on sale flag
-        
         if(idToMarketItem[itemId].amount < amount) { revert NotEnoughItemsForSale();}
-        //if(msg.value != getConversion(idToMarketItem[itemId].price) * amount) { revert NotEnoughItemsForSale();} //testing with no conversion
-        if(msg.value != idToMarketItem[itemId].price * amount) { revert NotAskingPrice();}
+        if(msg.value != utils.getConversion(idToMarketItem[itemId].price) * amount) { revert NotAskingPrice();} 
+        //if(msg.value != idToMarketItem[itemId].price * amount) { revert NotAskingPrice();}
 
         NFTicketsTic temp = NFTicketsTic(nftContract);    
         if(temp.getFinishTime(idToMarketItem[itemId].tokenId) <= block.timestamp) { revert NoLongerOnSale();}    // this should replace the onsale flag
@@ -177,7 +168,6 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         idToMarketItem[itemId].owner = payable(msg.sender); // *********** This actually makes the buyer listed as the owner - but it only means they are the last buyer or the last to become an owner of this NFT - NEEDS LOOKING INTO
         if(idToMarketItem[itemId].amount == 0){
             _itemsSold.increment();
-            //idToMarketItem[itemId].onSale = false; // ************ need to replace this with a different status code and also check if adding more listings needs to look at changing status code
         }
     }
 

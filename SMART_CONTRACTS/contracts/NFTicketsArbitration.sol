@@ -7,7 +7,10 @@ import "./NFTicketsTic.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// Custom Errors
+/**
+ * Custom errors to minimise gas
+ */
+
 error NoTicketForThisEvent(); // "You do not own a ticket for this event"
 error CannotDisputeFinalizedEvent(); // "Can't submit a dispute after the event has been completed and paid"
 error CannotDisputeEventBeforeStart(); // "Can't submit a dispute before the event has started"
@@ -18,8 +21,8 @@ error InsuficientBalanceToVote(); // "Can't vote if you didn't hold at least 1 t
 error VotingFinished(); // "Voting finished 4 days after event finish time"
 error InvalidChoice(); // "Votes can only be 1 = in buyer's favour or 2 = in seller's favour"
 error InsificientDisputeEveidence(); //"Not enough disputes raised to warrant vote"
-error NotEligible(); //
-error AlreadyVoted();
+error NotEligible(); // "Not eligible to withdraw a share of the profits at this time"
+error AlreadyVoted(); // "Already voted"
 
 contract NFTicketsArbitration is ReentrancyGuard, Ownable {
 
@@ -27,7 +30,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     NFTicketsTok immutable TOKEN;
     NFTicketsTic public TICKET;
     uint256 constant internal DAY = 86400;
-    int64 constant internal MAX_DISTANCE = 9000000000; // ~0.9 degrees at 10 decimals // ****** Didn't end up using this yet...
+    //int64 constant internal MAX_DISTANCE = 9000000000; // ~0.9 degrees at 10 decimals // *** Not integrated into this version of the contract
 
     constructor(address _token) {
         TOKEN = NFTicketsTok(_token);
@@ -209,7 +212,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     }
 
     // this should be called by the keeper functionality
-    // ***** need to make this executed by the keeper only ****
     function executeDecisions () public nonReentrant {
         for (uint i = 0; i < disputeIndex; i++) {
             voteCount(i);
@@ -227,7 +229,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     }
 
     // this should be called by the keeper functionality
-    // ***** need to make this executed by the keeper only ****
     function executeDecisionsWhenNeeded () public nonReentrant {
         for (uint i = 0; i < disputeIndex; i++) {
             if (disputeToDecisions[i].outcome == 0 || disputeToDecisions[i].outcome == 1) { // checks to see if the voting outcome so far is neutral/not voted or in favour of the buyer if yes proceeds to next check
@@ -256,7 +257,6 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
 
     // This needs to be triggered by the keeper on a timed basis
     // This one will receive 5% from the sales
-    // ****** also need to test this works as right now it's only an internal function - change to public to test *******
     function executePaySellers() public {
         MARKET.paySellers();
     }

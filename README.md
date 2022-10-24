@@ -11,3 +11,4 @@ This repo will focus on improving the NFTickets dapp initially designed during t
 
 Deploying SMART_CONTRACTS:
 npx hardhat deploy --network fuji
+npx hardhat run scripts/Setup.js --network fuji

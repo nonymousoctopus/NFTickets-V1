@@ -8,7 +8,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
 
-    log("Deploying NFTickets Token contrat")
+    log("Deploying NFTickets Token contract")
     const NFTicketsTok = await deploy("NFTicketsTok", {
         from: deployer,
         args: "",
@@ -19,7 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log(`Token deployed at ${NFTicketsTok.address}`)
     log('------------------')
 
-    log("Deploying NFTickets Utils contrat")
+    log("Deploying NFTickets Utils contract")
     const NFTicketsUtils = await deploy("NFTicketsUtils", {
         from: deployer,
         args: "",
@@ -30,7 +30,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log(`Utils deployed at ${NFTicketsUtils.address}`)
     log('------------------')
 
-    log("Deploying NFTickets Arbitration contrat")
+    log("Deploying NFTickets Arbitration contract")
     const NFTicketsArbitration = await deploy("NFTicketsArbitration", {
         from: deployer,
         args: [NFTicketsTok.address],
@@ -41,7 +41,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log(`Arbitration deployed at ${NFTicketsArbitration.address}`)
     log('------------------')
 
-    log("Deploying NFTickets Market contrat")
+    log("Deploying NFTickets Market contract")
     const NFTicketsMarket = await deploy("NFTicketsMarket", {
         from: deployer,
         args: [NFTicketsArbitration.address, NFTicketsUtils.address],
@@ -52,7 +52,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log(`Market deployed at ${NFTicketsMarket.address}`)
     log('------------------')
 
-    log("Deploying NFTickets Ticket contrat")
+    log("Deploying NFTickets Ticket contract")
     const NFTicketsTic = await deploy("NFTicketsTic", {
         from: deployer,
         args: [NFTicketsMarket.address],
@@ -62,8 +62,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     })
     log(`Ticket deployed at ${NFTicketsTic.address}`)
     log('------------------')
-    //log(`Verify with: \n npx hardhat verify --network ${networkName} ${NFTicketsTok.address} ${args.toString().replace(/,/g, " ")
-
+    
     if (
         !developmentChains.includes(network.name) &&
         process.env.ETHERSCAN_API_KEY
@@ -75,6 +74,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         await verify(NFTicketsMarket.address, [NFTicketsArbitration.address, NFTicketsUtils.address])
         await verify(NFTicketsTic.address, [NFTicketsMarket.address])
     }
+
+    log('***************************************************')
+    log('Deployment finished')
+    log('remember to run the setup functions in the Utils and Arbitration contracts using the following command:')
+    log('npx hardhat run scripts/Setup.js --network <YourNetwork>')
+
 }
 
 module.exports.tags = ["all", "NFTickets"]

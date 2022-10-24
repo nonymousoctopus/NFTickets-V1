@@ -13,8 +13,10 @@ const POLYGON_MAINNET_RPC_URL =
 const GOERLI_RPC_URL =
     process.env.GOERLI_RPC_URL || "https://eth-goerli.alchemyapi.io/v2/your-api-key"
 const AVALANCHE_FUJI_TESTNET_RPC_URL = process.env.AVALANCHE_FUJI_TESTNET_RPC_URL
+const POLYGON_MUMBAI_TESTNET_RPC_URL = process.env.POLYGON_MUMBAI_TESTNET_RPC_URL
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY
+//const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY
 // optional
 const MNEMONIC = process.env.MNEMONIC || "Your mnemonic"
 const FORKING_BLOCK_NUMBER = process.env.FORKING_BLOCK_NUMBER
@@ -75,6 +77,11 @@ module.exports = {
             accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
             chainId: 137,
         },
+        mumbai: {
+          url: POLYGON_MUMBAI_TESTNET_RPC_URL,
+          accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+          chainId: 80001,
+      },
         fuji: {
           url: AVALANCHE_FUJI_TESTNET_RPC_URL,
           accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
@@ -88,6 +95,7 @@ module.exports = {
             polygon: POLYGONSCAN_API_KEY,
             goerli: ETHERSCAN_API_KEY,
             avalancheFujiTestnet: SNOWTRACE_API_KEY,
+            polygonMumbai: POLYGONSCAN_API_KEY,
             fuji: SNOWTRACE_API_KEY,
 
         },
