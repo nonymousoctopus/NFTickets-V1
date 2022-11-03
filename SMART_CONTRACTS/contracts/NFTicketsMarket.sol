@@ -190,7 +190,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         MarketItem[] memory items = new MarketItem[](unsoldItemCount);
         for (uint i = 0; i < itemCount; i++) {
             NFTicketsTic temp = NFTicketsTic(idToMarketItem[i + 1].nftContract);
-            if (idToMarketItem[i + 1].status != 6 && temp.getFinishTime(idToMarketItem[i + 1].tokenId) < block.timestamp) {
+            if (idToMarketItem[i + 1].status != 6 && temp.getFinishTime(idToMarketItem[i + 1].tokenId) > block.timestamp) {
                 uint currentId = i + 1;
                 MarketItem storage currentItem = idToMarketItem[currentId];
                 items[currentIndex] = currentItem;
