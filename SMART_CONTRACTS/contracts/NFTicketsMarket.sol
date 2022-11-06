@@ -25,6 +25,7 @@ error NotDisputed(); // "Not in dispute"
 error NoBuyers(); // "No Buyers"
 error NotOwner();
 error AlreadyRefunded();
+error NothingToRefundHere();
 
 
 //contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder, NFTicketsUtilities {
@@ -453,7 +454,8 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
 
     function sellerRefundOne (uint256 marketItem, address buyer) public nonReentrant {
         if(msg.sender != idToMarketItem[marketItem].seller) { revert SellerOnlyFunction();}
-        utils.sellerRefundOneUtils(marketItem, buyer);
+        if(addressToSpending[buyer][marketItem] <= 0) { revert NothingToRefundHere();}
+        payable(buyer).transfer(addressToSpending[buyer][marketItem]);
         addressToSpending[buyer][marketItem] = 0;  
     }
 

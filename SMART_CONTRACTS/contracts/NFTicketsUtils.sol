@@ -8,8 +8,6 @@ import "./NFTicketsMarket.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-error NothingToRefundHere();
-
 contract NFTicketsUtils is ReentrancyGuard, Ownable { 
 
     AggregatorV3Interface internal priceFeed;
@@ -62,13 +60,5 @@ contract NFTicketsUtils is ReentrancyGuard, Ownable {
         return tempPrice;
     }   
 
-    /**
-     * Purpose: Assists in refunding an individual buyer
-     */
-
-    function sellerRefundOneUtils (uint256 marketItem, address buyer) public nonReentrant { 
-        if(market.addressToSpending(buyer, marketItem) <= 0) { revert NothingToRefundHere();}
-        payable(buyer).transfer(market.addressToSpending(buyer, marketItem));
-    }
 
 }
