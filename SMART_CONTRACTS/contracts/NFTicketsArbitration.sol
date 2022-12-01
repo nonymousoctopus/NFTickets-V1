@@ -43,6 +43,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
         int64[] disputerLat;
         int64[] disputerLon;
         uint256[] disputerTime;
+        uint8[] disputerReason;
         string[] disputerEvidence;
     } 
 
@@ -79,7 +80,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
 
 
     // ******* Need to add a payment for lodging dispute? *******
-    function lodgeDispute(uint256 _itemId, int64 _disputerLat, int64 _disputerLon, uint256 _disputerTime, string memory _disputerEvidence) public nonReentrant {
+    function lodgeDispute(uint256 _itemId, int64 _disputerLat, int64 _disputerLon, uint256 _disputerTime, uint8 _disputerReason, string memory _disputerEvidence) public nonReentrant {
         if(TICKET.balanceOf(msg.sender, MARKET.getTokenByMarketId(_itemId)) == 0) { revert NoTicketForThisEvent();}
         if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) - DAY) > block.timestamp) { revert CannotDisputeEventBeforeStart();}
         if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) + DAY) < block.timestamp) { revert CannotDisputeFinalizedEvent();}
@@ -92,6 +93,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
             disputes[disputeIndex].disputerLat.push(_disputerLat);
             disputes[disputeIndex].disputerLon.push(_disputerLon);
             disputes[disputeIndex].disputerTime.push(_disputerTime);
+            disputes[disputeIndex].disputerReason.push(_disputerReason);
             disputes[disputeIndex].disputerEvidence.push(_disputerEvidence);
             MARKET.changeStatus(_itemId, 2); // Changes status of the market item to In dispute (complaint raised)
 
@@ -109,6 +111,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                     disputes[i].disputerLat.push(_disputerLat);
                     disputes[i].disputerLon.push(_disputerLon);
                     disputes[i].disputerTime.push(_disputerTime);
+                    disputes[i].disputerReason.push(_disputerReason);
                     disputes[i].disputerEvidence.push(_disputerEvidence);
                 } else {
                     newDispute = true;
@@ -121,6 +124,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                 disputes[disputeIndex].disputerLat.push(_disputerLat);
                 disputes[disputeIndex].disputerLon.push(_disputerLon);
                 disputes[disputeIndex].disputerTime.push(_disputerTime);
+                disputes[disputeIndex].disputerReason.push(_disputerReason);
                 disputes[disputeIndex].disputerEvidence.push(_disputerEvidence);
                 MARKET.changeStatus(_itemId, 2); // Changes status of the market item to In dispute (complaint raised)
                 disputeIndex = disputeIndex + 1;
