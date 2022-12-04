@@ -6,6 +6,9 @@ import PropTypes from 'prop-types'
 
 import NFTicketsnavlinks from './n-f-ticketsnavlinks'
 import './n-f-tic-header.css'
+import logo from '../NFTickets_logo_wide.svg';
+
+//const DEFAULT_LOGO = Image.resolveAssetSource(logo).uri;
 
 const NFTicHeader = (props) => {
 
@@ -122,9 +125,10 @@ const NFTicHeader = (props) => {
 }
 
 NFTicHeader.defaultProps = {
-  image_src1:
-    'https://presentation-website-assets.teleporthq.io/logos/logo.png',
-  image_src: 'https://presentation-website-assets.teleporthq.io/logos/logo.png',
+  //image_src1: 'https://presentation-website-assets.teleporthq.io/logos/logo.png',
+  //image_src: 'https://presentation-website-assets.teleporthq.io/logos/logo.png',
+  image_src1: logo,
+  image_src: logo,
   Register: 'Connect Wallet',
   image_alt1: 'image',
   image_alt: 'logo',

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 
 import NFTicketsnavlinks from './n-f-ticketsnavlinks'
 import './n-f-tic-footer.css'
+import logo from '../NFTickets_logo_wide.svg';
 
 const NFTicFooter = (props) => {
   return (
@@ -44,7 +45,7 @@ const NFTicFooter = (props) => {
 NFTicFooter.defaultProps = {
   text: '© 2022 NFTickets.',
   image_alt: 'logo',
-  image_src: 'https://presentation-website-assets.teleporthq.io/logos/logo.png',
+  image_src: logo,
 }
 
 NFTicFooter.propTypes = {
