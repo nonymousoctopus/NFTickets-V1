@@ -1,0 +1,106 @@
+.arbitration-quick-view-gallery-card {
+  width: 100%;
+  display: flex;
+  box-shadow: 5px 5px 10px 0px #d4d4d4;
+  align-items: center;
+  padding-top: var(--dl-space-space-unit);
+  padding-left: var(--dl-space-space-unit);
+  border-radius: var(--dl-radius-radius-radius8);
+  padding-right: var(--dl-space-space-unit);
+  flex-direction: column;
+  padding-bottom: var(--dl-space-space-unit);
+  justify-content: center;
+  background-color: var(--dl-color-gray-white);
+}
+.arbitration-quick-view-image {
+  flex: 1;
+  width: 100%;
+  filter: grayscale();
+  height: 100%;
+  object-fit: cover;
+  transition: 0.3s;
+}
+.arbitration-quick-view-image:hover {
+  filter: none;
+}
+.arbitration-quick-view-heading {
+  color: var(--dl-color-primary-100);
+  font-size: 2em;
+  align-self: flex-start;
+  margin-top: var(--dl-space-space-halfunit);
+  font-weight: 600;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+.arbitration-quick-view-event-purchase-row {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  padding-bottom: var(--dl-space-space-unit);
+}
+.arbitration-quick-view-text {
+  color: var(--dl-color-gray-500);
+  width: 10em;
+  font-size: 1em;
+}
+.arbitration-quick-view-text1 {
+  color: var(--dl-color-success-300);
+  font-size: 1em;
+}
+.arbitration-quick-view-event-purchase-row1 {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  padding-bottom: var(--dl-space-space-unit);
+}
+.arbitration-quick-view-text2 {
+  color: var(--dl-color-gray-500);
+  width: 10em;
+  font-size: 1em;
+}
+.arbitration-quick-view-text3 {
+  color: var(--dl-color-danger-500);
+  font-size: 1em;
+}
+.arbitration-quick-view-event-purchase-row2 {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  padding-bottom: var(--dl-space-space-unit);
+}
+.arbitration-quick-view-text4 {
+  color: var(--dl-color-gray-500);
+  width: 10em;
+  font-size: 1em;
+}
+.arbitration-quick-view-text5 {
+  color: var(--dl-color-primary-100);
+  font-size: 1em;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width: 767px) {
+  .arbitration-quick-view-gallery-card {
+    flex-direction: column;
+  }
+}
+@media(max-width: 479px) {
+  .arbitration-quick-view-image {
+    height: 10rem;
+  }
+}

@@ -1,0 +1,108 @@
+.event-quick-view-gallery-card {
+  width: 100%;
+  display: flex;
+  box-shadow: 5px 5px 10px 0px #d4d4d4;
+  align-items: center;
+  padding-top: var(--dl-space-space-unit);
+  padding-left: var(--dl-space-space-unit);
+  border-radius: var(--dl-radius-radius-radius8);
+  padding-right: var(--dl-space-space-unit);
+  flex-direction: column;
+  padding-bottom: var(--dl-space-space-unit);
+  justify-content: center;
+  background-color: var(--dl-color-gray-white);
+}
+.event-quick-view-image {
+  flex: 1;
+  width: 100%;
+  filter: grayscale();
+  height: 100%;
+  aspect-ratio: 16/9;
+  object-fit:cover;
+  transition: 0.3s;
+}
+.event-quick-view-image:hover {
+  filter: none;
+}
+.event-quick-view-heading {
+  color: var(--dl-color-primary-100);
+  align-self: flex-start;
+  margin-top: var(--dl-space-space-halfunit);
+  font-weight: 600;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+.event-quick-view-container {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+.event-quick-view-container1 {
+  flex: 0 0 auto;
+  width: 67%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.event-quick-view-text {
+  color: var(--dl-color-gray-700);
+  align-self: flex-start;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+.event-quick-view-text1 {
+  color: var(--dl-color-gray-700);
+  align-self: flex-start;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+.event-quick-view-container2 {
+  flex: 0 0 auto;
+  width: 33%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.event-quick-view-text2 {
+  color: var(--dl-color-gray-500);
+  align-self: flex-end;
+  font-style: normal;
+  font-weight: 700;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+.event-quick-view-text3 {
+  color: var(--dl-color-gray-700);
+  align-self: flex-end;
+  margin-bottom: var(--dl-space-space-halfunit);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width: 767px) {
+  .event-quick-view-gallery-card {
+    flex-direction: column;
+  }
+}
+@media(max-width: 479px) {
+  .event-quick-view-image {
+    height: 10rem;
+  }
+}

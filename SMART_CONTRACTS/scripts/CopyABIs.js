@@ -3,7 +3,7 @@ var fs_Extra = require('fs-extra');
 var path = require('path');
 
 var source = './deployments/fuji';
-var destinationWeb = './../DAPP_WEB/my-app/src/abis';
+var destinationWeb = './../DAPP_WEB/src/abis';
 var destinationMobile = './../DAPP_MOBILE/abis';
 
 var copyRecursiveSync = function() {

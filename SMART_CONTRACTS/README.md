@@ -9,6 +9,10 @@ npx hardhat help
 npx hardhat test
 REPORT_GAS=true npx hardhat test
 npx hardhat node
-npx hardhat run scripts/deploy.js
+npx hardhat deploy --network fuji 
+
+npx hardhat run scripts/Setup.js --network fuji
+
 npx hardhat run scripts/CopyABIs.js 
+
 ```
