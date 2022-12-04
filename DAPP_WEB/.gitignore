@@ -10,7 +10,7 @@
 
 # production
 /build
-/abis/*
+
 
 # misc
 .env
