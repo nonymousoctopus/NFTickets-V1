@@ -10,6 +10,16 @@ In the project directory, you can run:
 
 ### `npm start`
 
+deploy on fleek via the following command:
+
+npm install && npm run build
+
+specify the directory for the react project:
+
+DAPP_WEB
+
+When deploying on Fleek ensure the enviornment variables are entered without qoutation marks
+
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
