@@ -4,7 +4,7 @@ var path = require('path');
 
 var source = './deployments/fuji';
 var destinationWeb = './../DAPP_WEB/my-app/src/abis';
-var destinationMobile = './../DAPP_MOBILE/mobile-app/abis';
+var destinationMobile = './../DAPP_MOBILE/abis';
 
 var copyRecursiveSync = function() {
 
