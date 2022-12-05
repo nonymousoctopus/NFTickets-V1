@@ -20,6 +20,7 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
     mapping (uint256 => address) private _tokenCreator;
     mapping (uint256 => uint256) public _price;
     mapping (uint256 => int64[2]) private coordinates;
+    mapping (uint256 => uint256) private eventStartTime;
     mapping (uint256 => uint256) private eventFinishTime;
 
     //need to create a mapping for price that will be used in the market contract as well and price cannot be set twice - to prevent scalping
@@ -35,7 +36,7 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
     }
 
     // Creates general admitance tokens - all have same value and no seat specific data
-    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 price, uint256 finishTime, int64 lat, int64 lon) public returns (uint) {
+    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 price, uint256 startTime, uint256 finishTime, int64 lat, int64 lon) public returns (uint) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         require(bytes(_uris[newItemId]).length == 0, "Cannot set URI twice");
@@ -45,6 +46,7 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
         _mint(msg.sender, newItemId, amount, data);
         _uris[newItemId] = tokenURI;
         _price[newItemId] = price;
+        eventStartTime[newItemId] = startTime;
         eventFinishTime[newItemId] = finishTime;
         coordinates[newItemId] = [lat, lon];
         setApprovalForAll(marketAddress, true);
@@ -90,6 +92,9 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
         return tokens;
     }
 
+    function getStartTime (uint256 tokenId) public view returns (uint256) {
+        return eventStartTime[tokenId];
+    }
     function getFinishTime (uint256 tokenId) public view returns (uint256) {
         return eventFinishTime[tokenId];
     }

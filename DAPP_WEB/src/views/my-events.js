@@ -208,7 +208,7 @@ const MyEvents = (props) => {
           const { lat, lng } = response.results[0].geometry.location;
           console.log('The Lat is: ' + lat + ' & the Lon is: ' + lng);
           // Mint the token - remember to multiply out the coordinates to avoid decimal places
-          createTokenFunction(metadata.url, values.ticketQuantity, values.ticketPrice, Date.parse(values.eventFinish)/1000, Math.round(lat*10000000000), Math.round(lng*10000000000), values.eventName);
+          createTokenFunction(metadata.url, values.ticketQuantity, values.ticketPrice, Date.parse(values.eventStart)/1000, Date.parse(values.eventFinish)/1000, Math.round(lat*10000000000), Math.round(lng*10000000000), values.eventName);
         },
         (error) => {
           console.error(error);
@@ -279,13 +279,13 @@ const MyEvents = (props) => {
 
     const [processing, setProcessing] = useState(null);
 
-    const createTokenFunction = async (uri, amount, price, finishTime, lattitude, longitude, name) => {
+    const createTokenFunction = async (uri, amount, price, startTime, finishTime, lattitude, longitude, name) => {
       // need uri from ipfs, amount, data, price, finish time in unix time, lat, lon
       let ticContract = new ethers.Contract(NFTicketsTic_abi.address, NFTicketsTic_abi.abi, signer);
       const contractWithSigner = ticContract.connect(signer);
       let priceInCents = price * 100;
   
-      let tx = await contractWithSigner.createToken(uri, amount, '0x00', priceInCents, finishTime, lattitude, longitude);     
+      let tx = await contractWithSigner.createToken(uri, amount, '0x00', priceInCents, startTime, finishTime, lattitude, longitude);     
       let receipt = await tx.wait(1)
   
       let tokenId = receipt.events[0].args.id.toNumber();

@@ -13,6 +13,7 @@ async function setUpUtils() {
     const arbitrationTransactionResponse = await Arbitration.setUp(Market.address, Tic.address)
     await arbitrationTransactionResponse.wait(1)
     console.log('Finished Arbitration setup - all done!')
+    console.log('Copy ABIs to your Web and Mobile Dapps using this command: npx hardhat run scripts/CopyABIs.js')
 }
 
 setUpUtils()

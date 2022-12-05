@@ -178,6 +178,7 @@ const PurchasedItem = (props: any) => {
   const [reselling, setReselling] = useState(false);
   const [sold, setSold] = useState(false);
 
+  /*
   const resellTicketsFunction = async (priceInCents, nftContractAddress, tokenId, amount, name) => {
     //console.log(itemId)
     if (tickets <= amount) {
@@ -191,6 +192,24 @@ const PurchasedItem = (props: any) => {
       let marketContract = new ethers.Contract(NFTicketsMarket_abi.address, NFTicketsMarket_abi.abi, signer);
       const marketWithSigner = await marketContract.connect(signer);
       let tx = await marketWithSigner.listNewMarketItem(nftContractAddress, tokenId, tickets, '0x00', name, {value: (listingFee.toString())});
+      //console.log(tx);
+      setReselling(false);
+      setSold(true);
+    } else {
+      alert('You cannot re-sell more tickets than you own')
+    }
+  }
+  */
+
+  //nftContract, uint256 tokenId, uint256 itemId, uint256 amount, bytes memory data
+  const reSellFunction = async (nftContractAddress, tokenId, itemId, amount) => {
+    if (tickets <= amount) {
+      setReselling(true);
+      await provider.enable();
+
+      let marketContract = new ethers.Contract(NFTicketsMarket_abi.address, NFTicketsMarket_abi.abi, signer);
+      const marketWithSigner = await marketContract.connect(signer);
+      let tx = await marketWithSigner.reSell(nftContractAddress, tokenId, itemId, tickets, '0x00');
       //console.log(tx);
       setReselling(false);
       setSold(true);
@@ -308,7 +327,7 @@ const PurchasedItem = (props: any) => {
           </TouchableOpacity>
           <View style={styles.ticketsInputArea}>
           <TextInput style={styles.ticketsInput} placeholder='1' keyboardType='numeric' onChangeText={(val) => setTickets(val)}/>
-          <TouchableOpacity style={styles.addButton} onPress={() => resellTicketsFunction(price, nftContract, tokenId, amount, name)}>
+          <TouchableOpacity style={styles.addButton} onPress={() => reSellFunction(nftContract, tokenId, itemId, amount)}>
             <Text style={styles.buyButtonText}>Resell tickets</Text>
           </TouchableOpacity> 
           </View>

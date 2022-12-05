@@ -12,6 +12,7 @@ import "./NFTicketsUtils.sol";
 error Not20PercentOfListing(); // "Listing fee must equal 20% of expected sales"
 error NotEnoughTokensForListing(); // "You don't own enough for this sale"
 error NoLongerOnSale(); // "No longer on sale"
+error EventStarting(); // "Cannot resell ticket this close to event start"
 error NotEnoughItemsForSale(); // "There are no more items to sell"
 error NotAskingPrice(); // "Please submit the asking price in order to complete the purchase"
 error ItemNotListed(); // "This item hasn't been listed yet"
@@ -146,6 +147,19 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         sellerToDepositPerItem[msg.sender][itemId] = sellerToDepositPerItem[msg.sender][itemId] + msg.value; // records how much deposit was paid by a seller/wallet for the market item
     }
 
+    //Allows buyers to relist their purchased market items back on the market up to 3 hours before the event starts
+    function reSell (address nftContract, uint256 tokenId, uint256 itemId, uint256 amount, bytes memory data) public payable nonReentrant{
+        if(findMarketItemId(nftContract, tokenId) <= 0) { revert ItemNotListed();}
+        NFTicketsTic temp = NFTicketsTic(nftContract);
+        if(temp.balanceOf(msg.sender, tokenId) < amount) { revert NotEnoughTokensForListing();}
+        if((temp.getStartTime(idToMarketItem[itemId].tokenId) - (DAY / 8)) <= block.timestamp) { revert EventStarting();}
+        
+        payable(msg.sender).transfer((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
+        idToMarketItem[itemId].totalSales = idToMarketItem[itemId].totalSales - ((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
+        addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] - ((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
+        temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
+        idToMarketItem[itemId].amount = idToMarketItem[itemId].amount + amount;
+    }
 
     // Returns the total value deposited by a seller on a particular market item listing - needs to become internal
     function getDeposit (address depositor, uint256 marketItem) private view returns (uint256) {
