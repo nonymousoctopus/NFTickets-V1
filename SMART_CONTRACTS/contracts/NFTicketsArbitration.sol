@@ -69,7 +69,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     // Sets market and ticket addresses
 
     function setUp (address _market, address _ticket) public onlyOwner {
-        MARKET = NFTicketsMarket(_market);`
+        MARKET = NFTicketsMarket(_market);
         TICKET = NFTicketsTic(_ticket);
     }
 
