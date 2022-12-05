@@ -1,5 +1,10 @@
 const crypto = require.resolve('crypto-browserify');
 const url = require.resolve('url/');
+const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+
+config,
 module.exports = {
   resolver: {
     extraNodeModules: {

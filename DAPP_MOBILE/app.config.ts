@@ -94,6 +94,9 @@ const config: ExpoConfig = {
   extra: {
     nftStorageKey: process.env.REACT_APP_NFT_STORAGE_KEY,
     apiUrl: process.env.API_URL,
+    eas: {
+      projectId: "b3c7e317-9315-4e0b-83a6-6e53a6255b3d",
+    }
   },
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -114,7 +117,7 @@ const config: ExpoConfig = {
     "supportsTablet": true
   },
   android: {
-    package: "com.clxyder.testdapp",
+    package: "com.nonymousoctopus.nftickets",
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff"
