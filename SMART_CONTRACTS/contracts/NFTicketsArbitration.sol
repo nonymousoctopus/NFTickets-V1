@@ -69,7 +69,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     // Sets market and ticket addresses
 
     function setUp (address _market, address _ticket) public onlyOwner {
-        MARKET = NFTicketsMarket(_market);
+        MARKET = NFTicketsMarket(_market);`
         TICKET = NFTicketsTic(_ticket);
     }
 
@@ -82,7 +82,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
     // ******* Need to add a payment for lodging dispute? *******
     function lodgeDispute(uint256 _itemId, int64 _disputerLat, int64 _disputerLon, uint256 _disputerTime, uint8 _disputerReason, string memory _disputerEvidence) public nonReentrant {
         if(TICKET.balanceOf(msg.sender, MARKET.getTokenByMarketId(_itemId)) == 0) { revert NoTicketForThisEvent();}
-        if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) - DAY) > block.timestamp) { revert CannotDisputeEventBeforeStart();}
+        if(TICKET.getStartTime(MARKET.getTokenByMarketId(_itemId)) > block.timestamp) { revert CannotDisputeEventBeforeStart();}
         if((TICKET.getFinishTime(MARKET.getTokenByMarketId(_itemId)) + DAY) < block.timestamp) { revert CannotDisputeFinalizedEvent();}
         // **** need to check that the dispute is being raised within a reasonable distance from the event location ****
         // cycle through existing disputes to make sure  there isn't already one fo this item
