@@ -95,7 +95,7 @@ const config: ExpoConfig = {
     nftStorageKey: process.env.REACT_APP_NFT_STORAGE_KEY,
     apiUrl: process.env.API_URL,
     eas: {
-      projectId: "b3c7e317-9315-4e0b-83a6-6e53a6255b3d",
+      projectId: "5cc3506d-1069-4689-ab21-daad44d61c29",
     }
   },
   orientation: "portrait",

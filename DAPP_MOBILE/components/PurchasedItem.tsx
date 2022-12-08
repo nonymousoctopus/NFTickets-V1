@@ -13,6 +13,7 @@ import * as FileSystem from 'expo-file-system';
 import {Picker} from '@react-native-picker/picker';
 //import { NFTStorage, File } from './../node_modules/nft.storage/dist/bundle.esm.min.js';
 import {REACT_APP_NFT_STORAGE_KEY} from '@env';
+import * as Svg from 'react-native-svg';
 
 import NFTicketsArbitration_abi from './../abis/NFTicketsArbitration.json'
 import NFTicketsMarket_abi from './../abis/NFTicketsMarket.json'
@@ -67,7 +68,6 @@ const PurchasedItem = (props: any) => {
   }
 
   const [evidencePreview, setEvidencePreview] = useState(null);
-  const [evidence, setEvidence] = useState(String);
 
   const [local, setLocal] = useState();
   const [errorMsg, setErrorMsg] = useState(null);
@@ -96,7 +96,6 @@ const PurchasedItem = (props: any) => {
 
     if (!result.canceled) {
       setEvidencePreview(result.assets[0].uri);
-      uploadToIPFS(result.assets[0].uri);
     }
   };
 
@@ -111,7 +110,6 @@ const PurchasedItem = (props: any) => {
 
     if (!result.canceled) {
       setEvidencePreview(result.assets[0].uri);
-      uploadToIPFS(result.assets[0].uri);
     }
   };
   
@@ -128,8 +126,7 @@ const PurchasedItem = (props: any) => {
     let finalString = noSlash.substring(18);
     let stringToJson = JSON.parse(finalString);
     let cid = 'https://nftstorage.link/ipfs/' + stringToJson.cid;
-    setEvidence(cid);
-    //console.log(evidence);
+    return (cid);
   }
     
     /******************************************************* */
@@ -161,11 +158,11 @@ const PurchasedItem = (props: any) => {
   const [ticketQR, setTicketQR] = useState();
   const [showQR, setShowQR] = useState(false);
 
-  const tryNewAuth = React.useCallback(async (_message:any ) => {
-    const kek256 = keccak256(utils.toUtf8Bytes(_message));
+  const getTicket = React.useCallback(async (_message:any ) => {
+    const string = _message.toString();
+    const kek256 = keccak256(utils.toUtf8Bytes(string));
     const parameters = [connector.accounts[0], kek256];
     let signed = await connector.signPersonalMessage(parameters);
-    //console.log(signed);
     setTicketQR(signed);
     setShowQR(true);
   }, [connector]);
@@ -177,29 +174,6 @@ const PurchasedItem = (props: any) => {
   const [tickets, setTickets] = useState(null);
   const [reselling, setReselling] = useState(false);
   const [sold, setSold] = useState(false);
-
-  /*
-  const resellTicketsFunction = async (priceInCents, nftContractAddress, tokenId, amount, name) => {
-    //console.log(itemId)
-    if (tickets <= amount) {
-      setReselling(true);
-      await provider.enable();
-      let utilsContract = new ethers.Contract(NFTicketsUtils_abi.address, NFTicketsUtils_abi.abi, signer);
-      let perTicketPrice = await utilsContract.getConversion(priceInCents);
-
-      let listingFee = perTicketPrice * amount / 5;
-
-      let marketContract = new ethers.Contract(NFTicketsMarket_abi.address, NFTicketsMarket_abi.abi, signer);
-      const marketWithSigner = await marketContract.connect(signer);
-      let tx = await marketWithSigner.listNewMarketItem(nftContractAddress, tokenId, tickets, '0x00', name, {value: (listingFee.toString())});
-      //console.log(tx);
-      setReselling(false);
-      setSold(true);
-    } else {
-      alert('You cannot re-sell more tickets than you own')
-    }
-  }
-  */
 
   //nftContract, uint256 tokenId, uint256 itemId, uint256 amount, bytes memory data
   const reSellFunction = async (nftContractAddress, tokenId, itemId, amount) => {
@@ -223,22 +197,24 @@ const PurchasedItem = (props: any) => {
   /******************************************************* */
 
   const [disputeSubmitted, setDisputeSubmitted] = useState(false);
+  const [disputing, setDisputing] = useState(false);
 
   const lodgeDisputeFunction = async (itemId) => {
+    setDisputing(true);
     let lat = Math.round(local.coords.latitude*10000000000);
     let lon = Math.round(local.coords.longitude*10000000000);
     let time = Math.round(local.timestamp/1000);
-    //let tempEvidence = 'placeholder';
-    if (evidence.length > 0 && disputeReason != 0) {
-      //console.log(itemId)
+    if (evidencePreview.length > 0 && disputeReason != 0) {
+      let submittedEvidence = await uploadToIPFS(evidencePreview);
       await provider.enable();
       let arbitrationContract = new ethers.Contract(NFTicketsArbitration_abi.address, NFTicketsArbitration_abi.abi, signer);
       const arbitrationWithSigner = await arbitrationContract.connect(signer);
-      let tx = await arbitrationWithSigner.lodgeDispute(itemId, lat, lon, time, disputeReason, evidence);
+      let tx = await arbitrationWithSigner.lodgeDispute(itemId, lat, lon, time, disputeReason, submittedEvidence);
       //console.log(tx);
+      setDisputing(false);
       setDisputeSubmitted(true);
-      setEvidence('');
     } else {
+      setDisputing(false);
       alert('No reason or evidence provided');
     }
   }
@@ -286,6 +262,9 @@ const PurchasedItem = (props: any) => {
                 
               </View>
                 {evidencePreview && <Image source={{ uri: evidencePreview }} style={styles.evidenceImage} />}
+                {disputing ? (
+                  <Text style={styles.purchaseMessage}>Submitting your dispute, please approve the transaction.</Text> 
+                ) : null}
                 {disputeSubmitted ? (
                   <Text style={styles.purchaseMessage}>Dispute submitted!</Text> 
                 ) : null}
@@ -322,7 +301,7 @@ const PurchasedItem = (props: any) => {
             <QRCode value={ticketQR} size={windowWidth * 0.9}/>
             </View>
           ) : null}
-          <TouchableOpacity style={styles.scanButton} onPress={() => tryNewAuth(tokenId)}>
+          <TouchableOpacity style={styles.scanButton} onPress={() => getTicket(tokenId)}>
             <Text style={styles.buyButtonText}>Show QR</Text>
           </TouchableOpacity>
           <View style={styles.ticketsInputArea}>
