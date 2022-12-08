@@ -100,11 +100,6 @@ then run:
 
 eas build -p android --profile preview
 
-
-then run:
-
-eas build
-
 and follow the prompts (select the mobile platform, generate a new Android Keystore, etc..)
 
 Your build will likely take a few minutes :)
@@ -116,3 +111,9 @@ Build file '/home/expo/workingdir/build/DAPP_MOBILE/node_modules/react-native-tc
 
 try this (remember to close the terminal and open a new one and log back into eas or it will not detect the chenge to implemintation): 
 https://stackoverflow.com/questions/72951365/could-not-find-method-compile-for-arguments-com-facebook-reactreact-native
+
+If still failing as expo isn't detecting the changes from compile to implemintation, try:
+
+expo eject
+
+then use android studio to build the APKs
