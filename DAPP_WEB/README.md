@@ -1,82 +1,63 @@
-# Getting Started with Create React App
+# NFTickets - dapp web
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project uses the React JS library. Please see [reactjs.org](https://reactjs.org/) for full documentation.
 
-## Available Scripts
+## Instructions
 
-In the project directory, you can run:
+Navigate to the DAPP_WEB directory:
 
-### `npm install`
+```
+cd DAPP_WEB
+```
 
-### `npm start`
+Install the dependencies:
 
-deploy on fleek via the following command:
+```
+npm install
+```
 
-npm install && npm run build
+Create a ```.env``` file as per the ```.env.example``` file and populate it with your keys.
 
-specify the directory for the react project:
+To obtain the ```REACT_APP_NFT_STORAGE_KEY``` visit [nft.storage](https://nft.storage/)
 
-DAPP_WEB
+To obtain the ```REACT_APP_GEOCODE_KEY``` [click here](https://developers.google.com/maps/documentation/geocoding/get-api-key)
 
-When deploying on Fleek ensure the enviornment variables are entered without qoutation marks
+Test locally:
 
-Runs the app in the development mode.\
+```
+npm start
+```
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## deploying on IPFS via Fleek
 
-### `npm test`
+If you choose to deploy this on IPFS via [fleek.co](https://fleek.co/), register and deploy your github repo using the following settings:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![Fleek settings screenshot](./../fleek_deployment_settings.png)
 
-### `npm run build`
+| Setting                    | Value                            |
+| -------------------------- | -------------------------------- |
+| Repository                 | github_username/NFTickets-V1     |
+| Framework                  | Create React App                 |
+| Docker Image Name          | fleek/create-react-app:node-16   |
+| Build command              | npm install && npm run build     |
+| Publish directory          | build                            |
+| Base directory             | DAPP_WEB                         |
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Enviornment Variables      | Value                            |
+| -------------------------- | -------------------------------- |
+| REACT_APP_NFT_STORAGE_KEY  | your_api_key                     |
+| REACT_APP_GEOCODE_KEY2     | your_api_key                     |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Mobile app deployment
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+You can now set up and deploy your mobile app.
 
-### `npm run eject`
+Navigate out of this directory to proceed:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+cd ..
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+[Click here for proceed with setting up and deploying the mobile app](./../DAPP_MOBILE/README.md)

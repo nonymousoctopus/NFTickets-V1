@@ -10,7 +10,7 @@ Navigate to the SMART_CONTRACTS directory:
 cd SMART_CONTRACTS
 ```
 
-Instrall the dependencies:
+Install the dependencies:
 
 ```
 npm install
