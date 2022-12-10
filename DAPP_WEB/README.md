@@ -22,6 +22,8 @@ To obtain the ```REACT_APP_NFT_STORAGE_KEY``` visit [nft.storage](https://nft.st
 
 To obtain the ```REACT_APP_GEOCODE_KEY``` [click here](https://developers.google.com/maps/documentation/geocoding/get-api-key)
 
+### Local testing
+
 Test locally:
 
 ```

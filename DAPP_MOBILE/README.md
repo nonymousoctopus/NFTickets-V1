@@ -1,119 +1,73 @@
-# NFTickets
+# NFTickets - dapp mobile
 
-This app leverages the WalletConnect Example on Expo template by clxyder
+This project uses the React Native Expo library. Please see [expo.dev](https://expo.dev/) for full documentation.
 
-create .env file as per the .env.example (obtain your own api key from nft.storage)
-run commands: 
-To install expo and all the rest
+This app leverages the [WalletConnect Example on Expo](https://github.com/clxyder/walletconnect-expo-example) template by clxyder
+
+## Instructions
+
+Navigate to the DAPP_WEB directory:
+
+```
+cd DAPP_MOBILE
+```
+
+Install the dependencies:
+
+```
 yarn
+```
 
-to start app in expo:
+Create a ```.env``` file as per the ```.env.example``` file and populate it with your key.
+
+To obtain the ```REACT_APP_NFT_STORAGE_KEY``` visit [nft.storage](https://nft.storage/)
+
+### Local testing
+
+Start the app in expo:
+
+```
 yarn start
+```
 
-to publish: 
+Then open with Expo Go on your phone.
+
+### Publishing
+
+To publish the app via Expo/EAS:
+
+```
 npm install -g eas-cli
+```
 
-may need
+OR if you require elevated privileges:
 
+```
 sudo npm install -g eas-cli
+```
 
+Login with your Expo details - *You will need to have an expo account*
 
+```
 eas login
+```
 
-login with your expo details
+Then enter your credentials as prompted.
 
+Configure your project for deployment:
+
+```
 eas build:configure
+```
 
-you may need to select yes to create an EAS project the first time and select the mobile platform you are building the app for
+You will need to update the ```app.config.ts``` file, un-comment lines 97-99, and update wirh the project ID you are provided.
 
-You will likely see something like this: 
+You may need to re-run the ```eas build:configure``` command if this is your first deployment, and select the mobile platform you wish to deploy to.
 
-Warning: Your project uses dynamic app configuration, and the EAS project ID can't automatically be added to it.
-https://docs.expo.dev/workflow/configuration/#dynamic-configuration-with-appconfigjs
+Build your app:
 
-To complete the setup process, set "extra.eas.projectId" in your app.config.ts:
-
-{
-  "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX"
-      }
-    }
-  }
-}
-
-Go to app.config.ts
-
-add the projectID provided by EAS into your app.config.ts on line 97 just after: apiUrl: process.env.API_URL in the following format:
-
-eas: {
-      projectId: "57335231-1972-4422-bad0-be0bcf8d72b0",
-    }
-
-
-To build a preview APK and not for the app store, modify your eas.json file:
-
-old content:
-{
-  "cli": {
-    "version": ">= 2.8.0"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal"
-    },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
-  }
-}
-
-new content:
-{
-  "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "preview2": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
-    },
-    "preview3": {
-      "developmentClient": true
-    },
-    "production": {}
-  }
-}
-
-
-
-then run:
-
+```
 eas build -p android --profile preview
+```
 
-and follow the prompts (select the mobile platform, generate a new Android Keystore, etc..)
-
-Your build will likely take a few minutes :)
-
-If your build fails due to 
-Build file '/home/expo/workingdir/build/DAPP_MOBILE/node_modules/react-native-tcp/android/build.gradle' line: 47
-
-> Could not find method compile() for arguments [com.facebook.react:react-native:+] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
-
-try this (remember to close the terminal and open a new one and log back into eas or it will not detect the chenge to implemintation): 
-https://stackoverflow.com/questions/72951365/could-not-find-method-compile-for-arguments-com-facebook-reactreact-native
-
-If still failing as expo isn't detecting the changes from compile to implemintation, try:
-
-expo eject
-
-then use android studio to build the APKs
+*Due to the recent changes to Apple's rules around NFTs and payment, an iOS app deployment has not been tested at the time of writing these instructions.*

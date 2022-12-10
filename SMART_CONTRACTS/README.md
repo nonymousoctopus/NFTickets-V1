@@ -26,6 +26,8 @@ Compile the contracts:
 npx hardhat compile
 ```
 
+### Deployment
+
 Deploy to the Avalanche Fuji testnet
 
 ```
@@ -37,6 +39,8 @@ Run the set up scripts to finalise your contract deployment:
 ```
 npx hardhat run scripts/Setup.js --network fuji
 ```
+
+### Preparation for web and mobile deployments
 
 Copy the ABIs for web and mobile deployments:
 
