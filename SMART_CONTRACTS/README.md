@@ -16,7 +16,7 @@ Instrall the dependencies:
 npm install
 ```
 
-Create a .env file as per the .env.example file and populate it with your keys.
+Create a ```.env``` file as per the ```.env.example``` file and populate it with your keys.
 
 *You may need to update the hardhat.config.js file if you choose to use a different blockchain, please remember to adjust your deployment comands accordingly.*
 
