@@ -52,6 +52,8 @@ npx hardhat run scripts/CopyABIs.js
 
 Go to [automation.chain.link](https://automation.chain.link) and register a new upkeep for the arbitration decision executions with the following settings:
 
+| Setting                   | Value                                                    |
+| ------------------------- | -------------------------------------------------------- |
 | Trigger                   | Time-based                                               |
 | Target contract address   | address of your deployed NFTicketsArbitration contract   |
 | Target function           | executeDecisionsWhenNeeded                               |
@@ -61,6 +63,8 @@ Fill in the rest of the details as you see fit.
 
 Repeat the above steps for the payments function with the following settings:
 
+| Setting                   | Value                                                    |
+| ------------------------- | -------------------------------------------------------- |
 | Trigger                   | Time-based                                               |
 | Target contract address   | address of your deployed NFTicketsArbitration contract   |
 | Target function           | executePaySellers                                        |
