@@ -41,16 +41,3 @@ cd NFTickets-V1
 ### Mobile
 
 [Click here for instructions on setting up and deploying the mobile application](DAPP_MOBILE/README.md)
-
-
-
-- Improvements to exisiting smart contract (security and feature enhancements)
-- Development of a web based front end for event hosts and customer - to be hosted on IPFS/Filecoin
-- Development of an iOS version of the app
-- Improvements of the Android version of the app
-- Development of event verification and complaints functionality, leveraging IPFS/Filecoin for evidence storage
-- Documentation and user guides
-
-Deploying SMART_CONTRACTS:
-npx hardhat deploy --network fuji
-npx hardhat run scripts/Setup.js --network fuji

@@ -38,6 +38,8 @@ If you choose to deploy this on IPFS via [fleek.co](https://fleek.co/), register
 
 ![Fleek settings screenshot](./../fleek_deployment_settings.png)
 
+### Deployment settings
+
 | Setting                    | Value                            |
 | -------------------------- | -------------------------------- |
 | Repository                 | github_username/NFTickets-V1     |
@@ -47,10 +49,14 @@ If you choose to deploy this on IPFS via [fleek.co](https://fleek.co/), register
 | Publish directory          | build                            |
 | Base directory             | DAPP_WEB                         |
 
+### Enviornment variabls
+
 | Enviornment Variables      | Value                            |
 | -------------------------- | -------------------------------- |
 | REACT_APP_NFT_STORAGE_KEY  | your_api_key                     |
 | REACT_APP_GEOCODE_KEY2     | your_api_key                     |
+
+Once you have all the above filled in, click **Deploy site**
 
 ## Mobile app deployment
 

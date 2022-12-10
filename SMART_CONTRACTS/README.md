@@ -48,6 +48,24 @@ Copy the ABIs for web and mobile deployments:
 npx hardhat run scripts/CopyABIs.js 
 ```
 
+### Chainlink Automation set up
+
+Go to [automation.chain.link](https://automation.chain.link) and register a new upkeep for the arbitration decision executions with the following settings:
+
+| Trigger                   | Time-based                                               |
+| Target contract address   | address of your deployed NFTicketsArbitration contract   |
+| Target function           | executeDecisionsWhenNeeded                               |
+| Cron expression           | 0 0 * * *                                                |
+
+Fill in the rest of the details as you see fit.
+
+Repeat the above steps for the payments function with the following settings:
+
+| Trigger                   | Time-based                                               |
+| Target contract address   | address of your deployed NFTicketsArbitration contract   |
+| Target function           | executePaySellers                                        |
+| Cron expression           | 1 0 * * *                                                |
+
 ## Website deployment
 
 It is recommended that you set up the website before deploying the mobile app as it allows you to create events. 
