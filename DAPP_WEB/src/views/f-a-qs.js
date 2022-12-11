@@ -6,6 +6,7 @@ import NFTicHeader from '../components/n-f-tic-header'
 import QuestionCard from '../components/question-card'
 import NFTicFooter from '../components/n-f-tic-footer'
 import './f-a-qs.css'
+import Masonry from 'react-masonry-css'
 
 const faqs = [
   {title: "What is NFTickets?", description: <p>It’s a dapp designed to allow anyone to market and sell tickets to their real work events on the blockchain, and allow buyers to easily purchase and use their tickets when attending these events.<br></br><br></br>
@@ -17,11 +18,11 @@ const faqs = [
   {title: "How do I sell additional tickets?", description: <p>You can list additional tickets for an existing event on the <a href='#/my-events' style={{color: '#67D8AE'}}>My Events</a> page, simply select your event, specify how many tickets you would like to add, and click ‘Add tickets to market’.</p>},
   {title: "What are the host/seller fees?", description: <p>Tickets sellers will be charged a flat 5% fee on their sales, however they must deposit 20% of the total potential sales value when creating an event or adding additional tickets. Most of this deposit will be refunded unless the event submitted is fraudulent and penalties need to be applied.<br></br><br></br>
   <i>In addition to the above, you will be charged for gas by the blockchain.</i></p>},
+  {title: "Can I create events on the app?", description: <p>No, to keep administration of events a little easier, in this version of NFTickets all events must be created via the website.</p>},
   {title: "What are the penalty mechanisms of NFTickets?", description: <p>If an event is deemed fraudulent by a buyer, they can submit a dispute for an event no later than 24 hours after the event has finished. To reduce the chances of dishonest disputes, disputes with less than 5% of ticket purchasers will be automatically ruled in favour of the seller.<br></br><br></br>
   Disputes that have more than 5% of purchasers, will go to arbitration, and will be voted on by $NFTK token holders. And will have their votes tallied up after 3 days.<br></br><br></br>
   Disputes found in favour of the seller will proceed to payment and the event host/seller will receive payment 4-5 days after their event finishes (depending on time zones).<br></br><br></br>
   Disputes found in favour of the buyer will proceed with a full refund of the purchase price, plus 15% of the ticket value taken from the host/seller deposit.</p>},
-  {title: "Can I create events on the app?", description: <p>No, to keep administration of events a little easier, in this version of NFTickets all events must be created via the website.</p>},
   {title: "How do I check tickets for my event?", description: <p>To check the tickets at the door, use the NFTickets app on your Android mobile phone. Go to the <a href='#/my-events' style={{color: '#67D8AE'}}>My Events</a> section at the bottom of the screen, select your event, and tap on ‘Scan tickets’.<br></br><br></br>
   It is recommended that you scan event tickets no earlier than 3 hours before the event starts as at this point tickets can no longer be re-listed on the market by a buyer for an automatic refund.</p>},
   {title: "When does the host/seller get paid?", description: <p>If an event does not get disputed within 24 hours of finishing, the host/seller will be paid 1-2 days after the event finishes (depending on time zones). If an event has a dispute raised against it, but is found in favour of the host/seller, payment will be automatically processed within 4-5 days (depending on time zones).</p>},
@@ -45,11 +46,16 @@ const faqs = [
   {title: "What if a buyer lodged a fraudulent dispute?", description: <p>If less than 5% of buyers for your event lodge a dispute, you will not be penalised and will be paid your event proceeds (less 5% commission) 1-2 days after your event finishes (depending on time zones).<br></br><br></br>
   If more than 5% of buyers for your event lodge a dispute, this will proceed to arbitration. Fraudulent disputes (as judged by $NFTK token holders) will take 4-5 days to process (depending on time zones).</p>},
   {title: "Why do time zones matter for payments and disputes?", description: <p>NFTickets uses automated dispute and payment processing using Chainlink Automation, and is scheduled to process transactions every 24 hours at midnight UTC time. Depending on the time zone of your event, your event processing may fall into the day’s batch or be scheduled for tomorrow.</p>},
+  {title: "How can I buy $NFTK tokens?", description: <p>As NFTickets is currently in the ‘Proof of Concept’ stage, no tokens are being distributed, and only the creator can choose to send tokens to wallet addresses for testing. If you would like to get in touch, reach out to @nonymousoctopus on twitter.</p>},
   {title: "Who arbitrates disputes?", description: <p>Only $NFTK token holders who held tokens at the time a dispute is raised can vote on disputes.<br></br><br></br>
   Additionally, automated decisions will be carried out by the smart contract such as in cases where less than 5% of ticket buyers submit a dispute. For more information please refer to the ‘What are the penalty mechanisms of NFTickets?’ question above.</p>},
-  {title: "How can I buy $NFTK tokens?", description: <p>As NFTickets is currently in the ‘Proof of Concept’ stage, no tokens are being distributed, and only the creator can choose to send tokens to wallet addresses for testing. If you would like to get in touch, reach out to @nonymousoctopus on twitter.</p>},
   {title: "How can a $NFTK token holder withdraw their voting rewards?", description: <p>$NFTK token holders can withdraw their voting rewards via the website on the ‘Arbitration’ page.</p>}
 ]
+
+const breakpointColumnsObj = {
+  default: 2,
+  767: 1
+};
 
 const FAQs = (props) => {
   return (
@@ -63,12 +69,21 @@ const FAQs = (props) => {
         <div className="f-a-qs-features">
           <h1 className="f-a-qs-text">FAQs</h1>
           <div className="f-a-qs-container1">
+          <Masonry
+              breakpointCols={breakpointColumnsObj}
+              className="my-masonry-grid"
+              columnClassName="my-masonry-grid_column">
             {faqs.map((faq) => (
+              
+              <div>
               <QuestionCard rootClassName="rootClassName"
                 title={faq.title}
                 description={faq.description}
                 ></QuestionCard>
+                </div>
+                
             ))}
+            </Masonry>
           </div>
         </div>
       </div>
