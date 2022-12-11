@@ -2,6 +2,8 @@
 
 NFTickets is at this stage a proof-of-concept application, allowing users to list tickets to real-world events on the blockchain. Allowing both event organisers and ticket purchasers to benefit from reduced fees and trust minimised open source contracts, penaliseing bad behaviour, and allowing token holders who vote on dispouted events to receive rewards for their participation. 
 
+[Click here to visit a demo site](https://steep-resonance-4437.on.fleek.co/#/)
+
 ## Improvements
 
 This mono-repo improves the NFTickets dapp initially designed during the Chainlink 2022 Spring Hackathon:
