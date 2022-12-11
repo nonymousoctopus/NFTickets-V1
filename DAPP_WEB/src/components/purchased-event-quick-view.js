@@ -87,8 +87,11 @@ const PurchasedEventQuickView = (props) => {
     console.log(disputeTempImage);
   };
  
+  const [reList, setReList] = useState(null);
 
-
+  const reListFunction = async () => {
+    console.log(reList);
+  }
 
 
   const { price, name, image, tokenId, start, location, startFull, finish, description, nftContract, itemId, amount } = props;
@@ -137,22 +140,7 @@ const PurchasedEventQuickView = (props) => {
                 {description}
               </span>
             </div>
-            <h1 className="my-events-seller-actions">
-              <span>Lodge a dispute:</span>
-              <br></br>
-            </h1>
-            <span className='evidence-label'>Evidence:</span>
-            <form className='event-dispute-form'>
             
-            <div className='evidence-input'>
-            <input type="file" onChange={readFiles} />
-            </div>
-
-            <button className="evidence-button button" onClick={() => lodgeDisputeFunction({itemId})}>
-              Lodge dipute
-            </button>
-            </form>
-            <span className='processing-dispute'>{processing}</span>
             
             
           </div>

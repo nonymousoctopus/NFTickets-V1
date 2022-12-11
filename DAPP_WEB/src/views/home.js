@@ -431,9 +431,9 @@ const Home = (props) => {
               >
                 Explore events
               </a>
-              <button id="btn_learnmore" className="home-button button">
-                Learn more
-              </button>
+              <a id="btn_learnmore" className="home-button button" href="https://nftstorage.link/ipfs/bafybeicf2hwupeikecrvb4s7gik5e2djqm6iinfw3de7aaalmvxhbxg5wu">
+                Download apk
+              </a>
             </div>
             <span className="home-text02">
               <span>

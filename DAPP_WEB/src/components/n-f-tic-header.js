@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {ethers} from 'ethers'
 
@@ -72,6 +72,11 @@ const NFTicHeader = (props) => {
 		contract.set(event.target.setText.value);
 	}
 
+  useEffect(() => {
+    (async () => {
+      connectWalletHandler();
+    })();
+  }, []);
 
 
   return (

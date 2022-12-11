@@ -17,6 +17,45 @@
   flex-direction: column;
   justify-content: flex-start;
 }
+.arbitration-banner {
+  width: 100%;
+  display: flex;
+  padding: var(--dl-space-space-threeunits);
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.arbitration-banner-text {
+  color: var(--dl-color-success-300);
+  font-size: 3rem;
+  text-align: center;
+}
+.arbitration-banner-text01 {
+  max-width: var(--dl-size-size-maxwidth);
+  margin-top: var(--dl-space-space-twounits);
+  text-align: center;
+  margin-bottom: var(--dl-space-space-twounits);
+  color: var(--dl-color-gray-500);
+}
+.arbitration-banner-text02 {
+   color: var(--dl-color-gray-500);
+}
+.withdraw-button {
+  color: var(--dl-color-gray-white);
+  transition: 0.3s;
+  padding-top: var(--dl-space-space-unit);
+  border-width: 0px;
+  padding-left: var(--dl-space-space-twounits);
+  padding-right: var(--dl-space-space-twounits);
+  padding-bottom: var(--dl-space-space-unit);
+  background-color: var(--dl-color-success-300) !important;
+  border-radius: 4px;
+  font-weight: 700 !important;
+}
+.withdraw-button:hover {
+  transform: scale(1.02);
+  background-color: var(--dl-color-primary-100) !important;
+}
 .arbitration-gallery {
   width: 100%;
   display: flex;

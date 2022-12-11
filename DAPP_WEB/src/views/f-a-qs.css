@@ -33,7 +33,8 @@
   width: 100%;
   display: grid;
   grid-gap: var(--dl-space-space-twounits);
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+
 }
 @media(max-width: 767px) {
   .f-a-qs-features {

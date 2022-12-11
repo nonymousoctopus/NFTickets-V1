@@ -103,6 +103,14 @@ const Arbitration = (props) => {
     }
   }
 
+  const withdrawShareFunction = async () => {
+    
+    const arbitrationWithSigner = arbitrationContract.connect(signer);
+    let tx = await arbitrationWithSigner.withdrawShare();
+    console.log(tx);
+
+  }
+
   useEffect(() => {
     (async () => {
         drawDisputesGallery();
@@ -118,6 +126,32 @@ const Arbitration = (props) => {
       </Helmet>
 
       <div className="arbitration-n-f-tic-all-events">
+      <div className="arbitration-banner">
+            <h1 className="arbitration-banner-text">Get Involved!</h1>
+            <span className="arbitration-banner-text01">
+              <span className="arbitration-banner-text02">
+                When an event is in dispute, NFTickets token holders ($NFTK) are
+                encouraged to review the dispute and evidence provided, and make
+                a decision as to who is in the right. Active voters, are
+                rewarded with a portion of the event fees regardless of which way they vote. </span>
+              <br></br>
+              <br></br>
+              <span>
+                Rewards are automatically allocated to voters after the dispute
+                is processes which is 3-4 days after a dispute is lodged. So if
+                you vote on a dispute, remember to come back in a few days to
+                withdraw your rewards.
+              </span>
+              <br></br>
+            </span>
+            <button
+              id="withdraw"
+              name="withdraw"
+              className="withdraw-button" onClick={() => withdrawShareFunction()}
+            >
+              Withdraw Rewards
+            </button>
+          </div>
         <div className="arbitration-gallery">
           <h1 className="arbitration-text">Disputed events</h1>
           <span className="arbitration-text01">
@@ -125,8 +159,7 @@ const Arbitration = (props) => {
             decision.
           </span>
           <div className="arbitration-gallery1">
-          {disputes.map((dispute) => (
-                                                                                                                                                                                                                                            //itemId, name, sold, disputers, location, startFull, finish, price, offered, evidence, disputeId, image
+            {disputes.map((dispute) => (
               <DisputeEventQuickView rootClassName="event-quick-view-root-class-name" key={dispute.disputeId} itemId={dispute.itemId} name={dispute.name} sold={dispute.sold} disputers={dispute.disputers} location={dispute.location} startFull={dispute.startFull} finish={dispute.finish} price={dispute.price} offered={dispute.offered} evidence={dispute.evidence} disputeId={dispute.disputeId} image={dispute.image} status={dispute.status} reason={dispute.reason} />
             ))}
           </div>
