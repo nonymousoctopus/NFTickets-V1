@@ -100,9 +100,10 @@
   align-items: center;
   flex-direction: column;
   justify-content: stretch;
+  flex: 1;
 }
 .my-events-n-f-tic-all-events {
-  flex: 0 0 auto;
+  flex: 1 0 auto;
   width: 100%;
   height: auto;
 

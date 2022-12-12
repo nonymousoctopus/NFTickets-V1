@@ -14,6 +14,7 @@ import Home from './views/home'
 import FAQs from './views/f-a-qs'
 import MyEvents from './views/my-events'
 import NFTicHeader from './components/n-f-tic-header'
+import NFTicFooter from './components/n-f-tic-footer'
 
 
 
@@ -26,7 +27,7 @@ function App() {
   return (
     
     <Router>
-      <div>
+      <div style={{minHeight:"100vh", display:"flex", flexDirection:"column"}}>
         <NFTicHeader/>
         
         <Routes>
@@ -35,6 +36,7 @@ function App() {
           <Route element={<FAQs />} exact path="/f-a-qs" />
           <Route element={<MyEvents />} exact path="/my-events" />
         </Routes>
+        <NFTicFooter></NFTicFooter>
       </div>
     </Router>
     /*

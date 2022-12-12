@@ -31,6 +31,7 @@ const Arbitration = (props) => {
 
   const [disputes, setDisputes] = useState([]);
   let tempDisputes = [];
+  const [disputesText, setdisputesText] = useState("Looks like there are no dispsutes at this time.");
 
   async function drawDisputesGallery () {
     let totalDisputes = await arbitrationContract.disputeIndex();
@@ -74,11 +75,10 @@ const Arbitration = (props) => {
         })
       }
       existingDisputeTest = false;
-    }
-
-    
-    setDisputes(tempDisputes);
-    console.log(disputes);
+    }    
+    await setDisputes(tempDisputes);
+    await placeholder(tempDisputes);
+    //console.log(disputes);
   }
 
   async function statusConversion (statusNumber) {
@@ -107,8 +107,14 @@ const Arbitration = (props) => {
     
     const arbitrationWithSigner = arbitrationContract.connect(signer);
     let tx = await arbitrationWithSigner.withdrawShare();
-    console.log(tx);
+    //console.log(tx);
 
+  }
+
+  const placeholder = async (temp) => {
+    if (temp.length>0) {
+      setdisputesText("Select an event below to review the evidence and vote with your decision.")
+    }
   }
 
   useEffect(() => {
@@ -130,17 +136,15 @@ const Arbitration = (props) => {
             <h1 className="arbitration-banner-text">Get Involved!</h1>
             <span className="arbitration-banner-text01">
               <span className="arbitration-banner-text02">
-                When an event is in dispute, NFTickets token holders ($NFTK) are
-                encouraged to review the dispute and evidence provided, and make
-                a decision as to who is in the right. Active voters, are
-                rewarded with a portion of the event fees regardless of which way they vote. </span>
+                When an event is in dispute, NFTickets token holders ($NFTK) are encouraged to review the dispute and evidence provided, and make a decision as to who is in the right. 
+                <br></br>
+                Active voters, are rewarded with a portion of the event fees regardless of which way they vote. </span>
               <br></br>
               <br></br>
               <span>
-                Rewards are automatically allocated to voters after the dispute
-                is processes which is 3-4 days after a dispute is lodged. So if
-                you vote on a dispute, remember to come back in a few days to
-                withdraw your rewards.
+                Rewards are automatically allocated to voters after the dispute is processes which is 3-4 days after a dispute is lodged. 
+                <br></br>
+                So if you vote on a dispute, remember to come back in a few days to withdraw your rewards.
               </span>
               <br></br>
             </span>
@@ -155,8 +159,7 @@ const Arbitration = (props) => {
         <div className="arbitration-gallery">
           <h1 className="arbitration-text">Disputed events</h1>
           <span className="arbitration-text01">
-            Select an event below to review the evidence and vote with your
-            decision.
+            {disputesText}
           </span>
           <div className="arbitration-gallery1">
             {disputes.map((dispute) => (
@@ -165,7 +168,7 @@ const Arbitration = (props) => {
           </div>
         </div>
       </div>
-      <NFTicFooter></NFTicFooter>
+
     </div>
   )
 }

@@ -6,6 +6,9 @@
   align-items: flex-start;
   flex-direction: row;
   justify-content: flex-start;
+  border-color: var(--dl-color-primary-700);
+  border-radius: 8px;
+  border-width: 1px;
 }
 .question-card-icon {
   fill: var(--dl-color-gray-500);

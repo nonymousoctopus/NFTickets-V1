@@ -80,7 +80,7 @@ const Home = (props) => {
   const onSubmit = async (values, actions) => {
     // Data to upload into IPFS
     setProcessing("Your event is being created, you will need to authorise two transactions in metamask.");
-    console.log('Starting ipfs image upload test');
+    //console.log('Starting ipfs image upload test');
     const client = new NFTStorage({ token: NFT_STORAGE_KEY });
     const imageFile = new File([ eventTempImage.file ], eventTempImage.file.name, { type: eventTempImage.file.type }); // image
     const metadata = await client.store({
@@ -98,7 +98,7 @@ const Home = (props) => {
     Geocode.fromAddress(values.eventLocation.toString()).then(
       (response) => {
         const { lat, lng } = response.results[0].geometry.location;
-        console.log('The Lat is: ' + lat + ' & the Lon is: ' + lng);
+        //console.log('The Lat is: ' + lat + ' & the Lon is: ' + lng);
         // Mint the token - remember to multiply out the coordinates to avoid decimal places
         createTokenFunction(metadata.url, values.ticketQuantity, values.ticketPrice, Date.parse(values.eventStart)/1000, Date.parse(values.eventFinish)/1000, Math.round(lat*10000000000), Math.round(lng*10000000000), values.eventName);
       },
@@ -204,12 +204,13 @@ const Home = (props) => {
 
   const [events, setEvents] = useState([]);
   let tempEvents = [];
+  const [upcomingText, setUpcomingText] = useState("Oh, oh... Looks like there are no upcoming events. Why don't you go ahead and add one yourself?");
 
   async function drawMyEventsGallery () {
     //let result = await marketContract.fetchMyNFTs();
     let result = await marketContract.fetchItemsOnSale();
-    console.log('result: ');
-    console.log(result);
+    //console.log('result: ');
+    //console.log(result);
     //console.log(result2);
     for (let i=0; i < result.length; i++) {
       if (result[i].itemId.toNumber() !== 0){
@@ -228,7 +229,7 @@ const Home = (props) => {
         if (existingTest === false) {
           let imgLoad = await data['image'].replace("ipfs://", "https://nftstorage.link/ipfs/");
           let statusNumber = await result[i].status;
-          console.log(imgLoad);
+          //console.log(imgLoad);
           //console.log("Sold this many: " + (result[i].initialQuantity.toNumber() - result[i].amount.toNumber()))
           //let status = await statusConversion(statusNumber);
           // Event quick view: key = itemId, name = name, sold = totalSales, price = price, tickets on sale = amount, event start = need to get from ipfs, status = status
@@ -254,26 +255,16 @@ const Home = (props) => {
       }
       
     };
-    setEvents(tempEvents);
+    await setEvents(tempEvents);
+    await placeholder(tempEvents);
+
   }
 
-/*
-  async function statusConversion (statusNumber) {
-    if (statusNumber === 0) {
-      return "Normal";
-    } else if (statusNumber === 1) {
-      return "Sales processed";
-    } else if (statusNumber === 2) {
-      return "In dispute";
-    } else if (statusNumber === 3) {
-      return "Dispute resolved in seller's favour";
-    } else if (statusNumber === 4) {
-      return "Dispute resolved in buyer's favour";
-    } else if (statusNumber === 6) {
-      return "Refunded by seller";
+  const placeholder = async (temp) => {
+    if (temp.length>0) {
+      setUpcomingText("Here are the events that are coming up.")
     }
   }
-  */
   
     useEffect(() => {
       (async () => {
@@ -438,77 +429,14 @@ const Home = (props) => {
             <span className="home-text02">
               <span>
                 <span>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                  non volutpat turpis.
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-                <span>
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-              </span>
-              <span>
-                <span>
-                  Mauris luctus rutrum mi ut rhoncus. Integer in dignissim
-                  tortor. Lorem
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-                <span>
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-              </span>
-              <span>
-                <span>
-                  ipsum dolor sit amet, consectetur adipiscing elit.
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-                <span>
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
+                NFTickets is a dapp that allows event organisers to market and sell tickets to their events, and customers to browse and buy tickets using a simple website or mobile app.</span>
               </span>
               <br></br>
               <span></span>
               <br></br>
               <span>
                 <span>
-                  Mauris luctus rutrum mi ut rhoncus. Integer in dignissim
-                  tortor.
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
-                <span>
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: ' ',
-                    }}
-                  />
-                </span>
+                Check out the demo implementation below.</span>
               </span>
             </span>
           </div>
@@ -520,38 +448,7 @@ const Home = (props) => {
           <span className="home-text17">
             <span>
               <span>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non
-                volutpat turpis.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-            </span>
-            <br></br>
-            <span>
-              <span>
-                Mauris luctus rutrum mi ut rhoncus. Integer in dignissim tortor.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
+                {upcomingText}
               </span>
             </span>
           </span>
@@ -562,7 +459,6 @@ const Home = (props) => {
           </div>
         </div>
       </div>
-      <NFTicFooter></NFTicFooter>
       <button id="btn_addevent" className="home-button5 button" onClick={() => openModalCreateEvent()}>
         <svg viewBox="0 0 804.5714285714286 1024" className="home-icon4">
           <path d="M804.571 420.571v109.714c0 30.286-24.571 54.857-54.857 54.857h-237.714v237.714c0 30.286-24.571 54.857-54.857 54.857h-109.714c-30.286 0-54.857-24.571-54.857-54.857v-237.714h-237.714c-30.286 0-54.857-24.571-54.857-54.857v-109.714c0-30.286 24.571-54.857 54.857-54.857h237.714v-237.714c0-30.286 24.571-54.857 54.857-54.857h109.714c30.286 0 54.857 24.571 54.857 54.857v237.714h237.714c30.286 0 54.857 24.571 54.857 54.857z"></path>

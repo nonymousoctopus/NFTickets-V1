@@ -6,6 +6,7 @@
   position: relative;
   box-shadow: 0px 5px 10px 0px #d4d4d4;
   align-items: flex-start;
+  align-self: flex-end !important;
   justify-content: center;
   background-color: rgba(175, 177, 193, 0.2);
 }

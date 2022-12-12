@@ -20,7 +20,7 @@ const faqs = [
   <i>In addition to the above, you will be charged for gas by the blockchain.</i></p>},
   {title: "Can I create events on the app?", description: <p>No, to keep administration of events a little easier, in this version of NFTickets all events must be created via the website.</p>},
   {title: "What are the penalty mechanisms of NFTickets?", description: <p>If an event is deemed fraudulent by a buyer, they can submit a dispute for an event no later than 24 hours after the event has finished. To reduce the chances of dishonest disputes, disputes with less than 5% of ticket purchasers will be automatically ruled in favour of the seller.<br></br><br></br>
-  Disputes that have more than 5% of purchasers, will go to arbitration, and will be voted on by $NFTK token holders. And will have their votes tallied up after 3 days.<br></br><br></br>
+  Disputes that have more than 5% of purchasers, will go to arbitration, and will be voted on by <a href='https://testnet.snowtrace.io/address/0xA623149C6D653C96f1Aa23f38c03646cd0A615C8' target='_blank' style={{color: '#67D8AE'}}>$NFTK</a> token holders. And will have their votes tallied up after 3 days.<br></br><br></br>
   Disputes found in favour of the seller will proceed to payment and the event host/seller will receive payment 4-5 days after their event finishes (depending on time zones).<br></br><br></br>
   Disputes found in favour of the buyer will proceed with a full refund of the purchase price, plus 15% of the ticket value taken from the host/seller deposit.</p>},
   {title: "How do I check tickets for my event?", description: <p>To check the tickets at the door, use the NFTickets app on your Android mobile phone. Go to the <a href='#/my-events' style={{color: '#67D8AE'}}>My Events</a> section at the bottom of the screen, select your event, and tap on ‘Scan tickets’.<br></br><br></br>
@@ -44,12 +44,12 @@ const faqs = [
   If a host/seller chooses to refund you or all buyers, you will be refunded on the spot.<br></br><br></br>
   If you have submitted a dispute that has been ruled in the buyers favour, you should receive a refund within 4-5 days after the event finishes (depending on time zones). </p>},
   {title: "What if a buyer lodged a fraudulent dispute?", description: <p>If less than 5% of buyers for your event lodge a dispute, you will not be penalised and will be paid your event proceeds (less 5% commission) 1-2 days after your event finishes (depending on time zones).<br></br><br></br>
-  If more than 5% of buyers for your event lodge a dispute, this will proceed to arbitration. Fraudulent disputes (as judged by $NFTK token holders) will take 4-5 days to process (depending on time zones).</p>},
+  If more than 5% of buyers for your event lodge a dispute, this will proceed to arbitration. Fraudulent disputes (as judged by <a href='https://testnet.snowtrace.io/address/0xA623149C6D653C96f1Aa23f38c03646cd0A615C8' target='_blank' style={{color: '#67D8AE'}}>$NFTK</a> token holders) will take 4-5 days to process (depending on time zones).</p>},
   {title: "Why do time zones matter for payments and disputes?", description: <p>NFTickets uses automated dispute and payment processing using Chainlink Automation, and is scheduled to process transactions every 24 hours at midnight UTC time. Depending on the time zone of your event, your event processing may fall into the day’s batch or be scheduled for tomorrow.</p>},
   {title: "How can I buy $NFTK tokens?", description: <p>As NFTickets is currently in the ‘Proof of Concept’ stage, no tokens are being distributed, and only the creator can choose to send tokens to wallet addresses for testing. If you would like to get in touch, reach out to @nonymousoctopus on twitter.</p>},
-  {title: "Who arbitrates disputes?", description: <p>Only $NFTK token holders who held tokens at the time a dispute is raised can vote on disputes.<br></br><br></br>
+  {title: "Who arbitrates disputes?", description: <p>Only <a href='https://testnet.snowtrace.io/address/0xA623149C6D653C96f1Aa23f38c03646cd0A615C8' target='_blank' style={{color: '#67D8AE'}}>$NFTK</a> token holders who held tokens at the time a dispute is raised can vote on disputes.<br></br><br></br>
   Additionally, automated decisions will be carried out by the smart contract such as in cases where less than 5% of ticket buyers submit a dispute. For more information please refer to the ‘What are the penalty mechanisms of NFTickets?’ question above.</p>},
-  {title: "How can a $NFTK token holder withdraw their voting rewards?", description: <p>$NFTK token holders can withdraw their voting rewards via the website on the ‘Arbitration’ page.</p>}
+  {title: "How can a $NFTK token holder withdraw their voting rewards?", description: <p><a href='https://testnet.snowtrace.io/address/0xA623149C6D653C96f1Aa23f38c03646cd0A615C8' target='_blank' style={{color: '#67D8AE'}}>$NFTK</a> token holders can withdraw their voting rewards via the website on the ‘Arbitration’ page.</p>}
 ]
 
 const breakpointColumnsObj = {
@@ -87,7 +87,6 @@ const FAQs = (props) => {
           </div>
         </div>
       </div>
-      <NFTicFooter></NFTicFooter>
     </div>
   )
 }

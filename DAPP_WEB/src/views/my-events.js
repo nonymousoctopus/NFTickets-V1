@@ -65,6 +65,8 @@ const MyEvents = (props) => {
   const [purchasedEvents, setPurchasedEvents] = useState([]);
   let tempEvents = [];
   let tempPurchasedEvents = [];
+  const [hostText, setHostText] = useState("Oh, oh... Looks like you are not hosting any events. Why don't you go ahead and create one?");
+  const [purchaseText, setPurchaseText] = useState("Oh, oh... Looks like you haven't bought any tickets. Why don't you go ahead and buy some?");
 
   async function drawMyEventsGallery () {
     let result = await marketContract.fetchMyNFTs();
@@ -104,7 +106,8 @@ const MyEvents = (props) => {
       }
       existingTest = false;
     };
-    setEvents(tempEvents);
+    await setEvents(tempEvents);
+    await placeholderHost(tempEvents);
   }
 
   async function drawPurchasedEventsGallery () {
@@ -149,8 +152,8 @@ const MyEvents = (props) => {
       existingPurchasedTest = false;
       
     };
-    setPurchasedEvents(tempPurchasedEvents);
-    
+    await setPurchasedEvents(tempPurchasedEvents);
+    await placeholderPurchase(tempPurchasedEvents);
   }
 
 
@@ -188,7 +191,7 @@ const MyEvents = (props) => {
     const onSubmit = async (values, actions) => {
       // Data to upload into IPFS
       setProcessing("Your event is being created, you will need to authorise two transactions in metamask.");
-      console.log('Starting ipfs image upload test');
+      //console.log('Starting ipfs image upload test');
       const client = new NFTStorage({ token: NFT_STORAGE_KEY });
       const imageFile = new File([ eventTempImage.file ], eventTempImage.file.name, { type: eventTempImage.file.type }); // image
       const metadata = await client.store({
@@ -206,7 +209,7 @@ const MyEvents = (props) => {
       Geocode.fromAddress(values.eventLocation.toString()).then(
         (response) => {
           const { lat, lng } = response.results[0].geometry.location;
-          console.log('The Lat is: ' + lat + ' & the Lon is: ' + lng);
+          //console.log('The Lat is: ' + lat + ' & the Lon is: ' + lng);
           // Mint the token - remember to multiply out the coordinates to avoid decimal places
           createTokenFunction(metadata.url, values.ticketQuantity, values.ticketPrice, Date.parse(values.eventStart)/1000, Date.parse(values.eventFinish)/1000, Math.round(lat*10000000000), Math.round(lng*10000000000), values.eventName);
         },
@@ -302,6 +305,18 @@ const MyEvents = (props) => {
       let listingFee = perTicketPrice * amount / 5;
       let tx = await contractWithSigner.listNewMarketItem(nftContractAddress, tokenId, amount, '0x00', name, {value: (listingFee.toString())});
       setProcessing(null);
+    }
+
+    const placeholderHost = async (temp) => {
+      if (temp.length>0) {
+        setHostText("Here are the events you are hosting.")
+      }
+    }
+
+    const placeholderPurchase = async (temp) => {
+      if (temp.length>0) {
+        setPurchaseText("Here are the events you have tickets for.")
+      }
     }
   
 
@@ -440,38 +455,7 @@ const MyEvents = (props) => {
           <span className="my-events-text01">
             <span>
               <span>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non
-                volutpat turpis.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-            </span>
-            <br></br>
-            <span>
-              <span>
-                Mauris luctus rutrum mi ut rhoncus. Integer in dignissim tortor.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
+                {hostText}
               </span>
             </span>
           </span>
@@ -491,38 +475,8 @@ const MyEvents = (props) => {
           <span className="my-events-text01">
             <span>
               <span>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non
-                volutpat turpis.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-            </span>
-            <br></br>
-            <span>
-              <span>
-                Mauris luctus rutrum mi ut rhoncus. Integer in dignissim tortor.
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
-              </span>
-              <span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: ' ',
-                  }}
-                />
+                {purchaseText}
+                
               </span>
             </span>
           </span>
@@ -536,7 +490,6 @@ const MyEvents = (props) => {
         </div>
       </div>
 
-      <NFTicFooter></NFTicFooter>
       <button className="my-events-button4 button" onClick={() => openModalCreateEvent()}>
         <svg viewBox="0 0 804.5714285714286 1024" className="my-events-icon4">
           <path d="M804.571 420.571v109.714c0 30.286-24.571 54.857-54.857 54.857h-237.714v237.714c0 30.286-24.571 54.857-54.857 54.857h-109.714c-30.286 0-54.857-24.571-54.857-54.857v-237.714h-237.714c-30.286 0-54.857-24.571-54.857-54.857v-109.714c0-30.286 24.571-54.857 54.857-54.857h237.714v-237.714c0-30.286 24.571-54.857 54.857-54.857h109.714c30.286 0 54.857 24.571 54.857 54.857v237.714h237.714c30.286 0 54.857 24.571 54.857 54.857z"></path>

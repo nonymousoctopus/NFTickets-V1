@@ -161,6 +161,7 @@ select::placeholder {
   min-height: 100%;
   align-items: center;
   flex-direction: column;
+  flex: 1;
 }
 .home-n-f-tic-hero {
   flex: 0 0 auto;
@@ -168,7 +169,7 @@ select::placeholder {
   height: auto;
   display: flex;
   box-shadow: 0px 5px 10px 0px #d4d4d4;
-  min-height: 50vh;
+
   align-items: center;
   justify-content: center;
   background-color: rgba(206, 242, 229, 0.2);
@@ -182,6 +183,8 @@ select::placeholder {
   align-items: center;
   flex-direction: row;
   justify-content: space-between;
+  margin-top: 5vh;
+  margin-bottom: 5vh;
 }
 .home-image {
   flex: 1;
@@ -258,7 +261,7 @@ select::placeholder {
   padding-right: var(--dl-space-space-threeunits);
 }
 .home-n-f-tic-all-events {
-  flex: 0 0 auto;
+  flex: 1 0 auto;
   width: 100%;
   height: auto;
   display: flex;

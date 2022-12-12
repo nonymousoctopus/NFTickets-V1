@@ -48,7 +48,7 @@ const DisputeEventQuickView = (props) => {
     const contractWithSigner = arbitrationContract.connect(signer);
     let tx = await contractWithSigner.vote(disputeId, 2);     
     let receipt = await tx.wait(1)
-    console.log(receipt);
+    //console.log(receipt);
     setProcessing(null);
   }
 
@@ -57,7 +57,7 @@ const DisputeEventQuickView = (props) => {
     const contractWithSigner = arbitrationContract.connect(signer);
     let tx = await contractWithSigner.vote(disputeId, 1);     
     let receipt = await tx.wait(1)
-    console.log(receipt);
+    //console.log(receipt);
     setProcessing(null);
   }
   const [processing, setProcessing] = useState(null);
@@ -68,7 +68,7 @@ const DisputeEventQuickView = (props) => {
     if (files.length > 0) {
       setDisputeTempImage({...disputeTempImage, file: files[0]});
     }
-    console.log(disputeTempImage);
+    //console.log(disputeTempImage);
   };
  
   const { itemId, name, sold, disputers, location, startFull, finish, price, offered, evidence, image, disputeId, status, reason } = props;
