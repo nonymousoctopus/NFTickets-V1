@@ -153,12 +153,13 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         NFTicketsTic temp = NFTicketsTic(nftContract);
         if(temp.balanceOf(msg.sender, tokenId) < amount) { revert NotEnoughTokensForListing();}
         if((temp.getStartTime(idToMarketItem[itemId].tokenId) - (DAY / 8)) <= block.timestamp) { revert EventStarting();}
-        
-        payable(msg.sender).transfer((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
-        idToMarketItem[itemId].totalSales = idToMarketItem[itemId].totalSales - ((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
-        addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] - ((addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId));
-        temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
+
+        uint256 refundable = (addressToSpending[msg.sender][itemId]) * amount / temp.balanceOf(msg.sender, tokenId);
+        addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] - refundable;
+        idToMarketItem[itemId].totalSales = idToMarketItem[itemId].totalSales - refundable;
         idToMarketItem[itemId].amount = idToMarketItem[itemId].amount + amount;
+        temp.useUnderscoreTransfer(msg.sender, address(this), tokenId, amount, data);
+        payable(msg.sender).transfer(refundable);
     }
 
     // Returns the total value deposited by a seller on a particular market item listing - needs to become internal
@@ -178,10 +179,10 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         //idToMarketItem[itemId].seller.transfer(msg.value); // payment should come to this contract for escrow - right now it pays directly to the seller - commenting out will need this functionality in the future
         addressToSpending[msg.sender][itemId] = addressToSpending[msg.sender][itemId] + msg.value; // records how much was paid by a buyer/wallet for the item id
         addBuyerToItem (itemId, msg.sender);
-        temp.useUnderscoreTransfer(address(this), msg.sender, idToMarketItem[itemId].tokenId, amount, data);
         idToMarketItem[itemId].amount = idToMarketItem[itemId].amount - amount;
         idToMarketItem[itemId].totalSales = idToMarketItem[itemId].totalSales + msg.value;
         idToMarketItem[itemId].owner = payable(msg.sender); // *********** This actually makes the buyer listed as the owner - but it only means they are the last buyer or the last to become an owner of this NFT - NEEDS LOOKING INTO
+        temp.useUnderscoreTransfer(address(this), msg.sender, idToMarketItem[itemId].tokenId, amount, data);
         if(idToMarketItem[itemId].amount == 0){
             _itemsSold.increment();
         }
@@ -387,7 +388,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
     // Changes the status code of the market item - testing function only
     // ******* This function will need to become restricted to the DAO Timelock or keeper contract - _newStatus must refer to the decision from the DAO Governor / Controller *******
     function changeStatus (uint256 _marketItem, uint8 _newStatus) public onlyOwner {
-        if(_newStatus < 0 || _newStatus >= 7) { revert InvalidStatus();}
+        if(_newStatus >= 7) { revert InvalidStatus();} // CHECK NOT NEEDED WHEN LIMITED TO OWNER CONTRACT
         idToMarketItem[_marketItem].status = _newStatus;
     }
 
@@ -482,7 +483,7 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
         if(marketItemIdToBuyers[marketItem].length <= 0) { revert NoBuyers();}
         if(idToMarketItem[marketItem].finalCommision > 0) { revert AlreadyRefunded();}
 
-        uint256 depositShare = (getDeposit(idToMarketItem[marketItem].seller, marketItem) / 4 * 3) / marketItemIdToBuyers[marketItem].length; // works out share of total deposit - in this event the seller forfits their entire deposit amount - quarter to DAO and the rest to buyers
+        uint256 depositShare = (getDeposit(idToMarketItem[marketItem].seller, marketItem) * 3 / 4) / marketItemIdToBuyers[marketItem].length; // works out share of total deposit - in this event the seller forfits their entire deposit amount - quarter to DAO and the rest to buyers
         uint256 marketComission = getDeposit(idToMarketItem[marketItem].seller, marketItem) / 4; //Works out 5% of the deposit as market comission
         idToMarketItem[marketItem].finalCommision = marketComission;
 
@@ -491,10 +492,10 @@ contract NFTicketsMarket is ReentrancyGuard, ERC1155Holder {
             payable(marketItemIdToBuyers[marketItem][i]).transfer(addressToSpending[marketItemIdToBuyers[marketItem][i]][marketItem] + depositShare);
             addressToSpending[marketItemIdToBuyers[marketItem][i]][marketItem] = 0;
         }
-        (bool sent, bytes memory data) = owner.call{value: marketComission}(""); // Send comission to the owner (arbitration contract)
-        require(sent, "Failed to send Ether");
         sellerToDepositPerItem[idToMarketItem[marketItem].seller][marketItem] = 0;
         idToMarketItem[marketItem].name = string.concat("Refunded: ", idToMarketItem[marketItem].name);
+        (bool sent, bytes memory data) = owner.call{value: marketComission}(""); // Send comission to the owner (arbitration contract)
+        require(sent, "Failed to send Ether");
     }
 
     // Basic Access control

@@ -36,7 +36,7 @@ contract NFTicketsUtils is ReentrancyGuard, Ownable {
     function getConversion (uint256 _price) public view returns (uint256 conversion) {
         uint256 dataFeed = uint256(getLatestPrice()); //this will be the token to USD exchange rate from the pricefeed
         //uint256 multiplier = 100000; //this will get it to the right number of decimal places assuming that the price passed by the app could have cents - and has been multiplied by 100 to remove decimal places.
-        uint256 multiplier = 500000; //this will get it to the right number of decimal places assuming that the price passed by the app could have cents - and has been multiplied by 100 to remove decimal places.
+        uint256 multiplier = 5e5; //this will get it to the right number of decimal places assuming that the price passed by the app could have cents - and has been multiplied by 100 to remove decimal places.
         return conversion = _price * dataFeed * multiplier;
     }
 

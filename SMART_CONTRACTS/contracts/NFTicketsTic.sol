@@ -36,19 +36,19 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
     }
 
     // Creates general admitance tokens - all have same value and no seat specific data
-    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 price, uint256 startTime, uint256 finishTime, int64 lat, int64 lon) public returns (uint) {
+    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 price, uint256 startTime, uint256 finishTime, int64 lat, int64 lon) public nonReentrant returns (uint) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         require(bytes(_uris[newItemId]).length == 0, "Cannot set URI twice");
         require((_price[newItemId]) == 0, "Cannot set price twice");
         require(price > 0, "price cannot be 0");
         _tokenCreator[newItemId] = msg.sender;
-        _mint(msg.sender, newItemId, amount, data);
         _uris[newItemId] = tokenURI;
         _price[newItemId] = price;
         eventStartTime[newItemId] = startTime;
         eventFinishTime[newItemId] = finishTime;
         coordinates[newItemId] = [lat, lon];
+        _mint(msg.sender, newItemId, amount, data);
         setApprovalForAll(marketAddress, true);
         return newItemId;
     }
@@ -66,7 +66,7 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
     }
 
     // ********* Need to rename function *********
-    function useUnderscoreTransfer (address from, address to, uint256 tokenId, uint256 amount, bytes memory data) public {
+    function useUnderscoreTransfer (address from, address to, uint256 tokenId, uint256 amount, bytes memory data) public nonReentrant {
         _safeTransferFrom(from, to, tokenId, amount, data);
     }
 
