@@ -18,7 +18,7 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
 
     mapping (uint256 => string) private _uris;
     mapping (uint256 => address) private _tokenCreator;
-    mapping (uint256 => uint256) public _price;
+    mapping (uint256 => uint256) public eventPrice;
     mapping (uint256 => int64[2]) private coordinates;
     mapping (uint256 => uint256) private eventStartTime;
     mapping (uint256 => uint256) private eventFinishTime;
@@ -32,24 +32,24 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
 
     // Returns the maximum per unit price of the tokenId (i.e. per ticket)
     function price(uint256 tokenId) public view returns (uint256) {
-      return(_price[tokenId]);
+      return(eventPrice[tokenId]);
     }
 
     // Creates general admitance tokens - all have same value and no seat specific data
-    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 price, uint256 startTime, uint256 finishTime, int64 lat, int64 lon) public returns (uint) {
+    function createToken(string memory tokenURI, uint256 amount, bytes memory data, uint256 _price, uint256 startTime, uint256 finishTime, int64 lat, int64 lon) public nonReentrant returns (uint) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         require(bytes(_uris[newItemId]).length == 0, "Cannot set URI twice");
-        require((_price[newItemId]) == 0, "Cannot set price twice");
-        require(price > 0, "price cannot be 0");
+        require((eventPrice[newItemId]) == 0, "Cannot set price twice");
+        require(_price > 0, "price cannot be 0");
         _tokenCreator[newItemId] = msg.sender;
-        _mint(msg.sender, newItemId, amount, data);
         _uris[newItemId] = tokenURI;
-        _price[newItemId] = price;
+        eventPrice[newItemId] = _price;
         eventStartTime[newItemId] = startTime;
         eventFinishTime[newItemId] = finishTime;
         coordinates[newItemId] = [lat, lon];
         setApprovalForAll(marketAddress, true);
+        _mint(msg.sender, newItemId, amount, data);
         return newItemId;
     }
 
@@ -60,13 +60,13 @@ contract NFTicketsTic is ERC1155URIStorage, ReentrancyGuard {
     }
 
     // *********** This send function hasn't been used in the marketplace yet - tagged for possible deletion *************
-    function sendFree (address to, uint256 tokenId, uint256 amount, bytes memory data) public {
-        _safeTransferFrom(msg.sender, to, tokenId, amount, data);
+    function sendFree (address to, uint256 tokenId, uint256 amount, bytes memory data) public nonReentrant {
         setApprovalForAll(to, true);
+        _safeTransferFrom(msg.sender, to, tokenId, amount, data);
     }
 
     // ********* Need to rename function *********
-    function useUnderscoreTransfer (address from, address to, uint256 tokenId, uint256 amount, bytes memory data) public {
+    function useUnderscoreTransfer (address from, address to, uint256 tokenId, uint256 amount, bytes memory data) public nonReentrant {
         _safeTransferFrom(from, to, tokenId, amount, data);
     }
 

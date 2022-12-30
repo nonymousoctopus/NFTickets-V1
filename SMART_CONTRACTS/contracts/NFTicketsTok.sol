@@ -12,7 +12,7 @@ contract NFTicketsTok is ERC20Snapshot {
      * Set up: Creator receives entire supply of tokens, first snapshot is taken
      */
 
-    uint256 public constant s_maxSupply = 1000000000000000000000000; // 1 million tokens
+    uint256 public constant s_maxSupply = 1e24; // 1 million tokens
     constructor () 
     ERC20("NFTicketsToken", "NFTK") 
 
