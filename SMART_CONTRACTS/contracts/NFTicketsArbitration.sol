@@ -98,9 +98,11 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
             disputeIndex = disputeIndex + 1;
             MARKET.changeStatus(_itemId, 2); // Changes status of the market item to In dispute (complaint raised)
         } else {
-            bool newDispute = false;
+            //bool newDispute = false;
+            bool existingDispute = false;
             for (uint i = 0; i < disputeIndex; i++){
                 if(disputes[i].itemId == _itemId) { // if itemId matches existing dispute
+                    existingDispute = true;
                     for (uint j = 0; j < disputes[i].disputers.length; j++) {
                         if(disputes[i].disputers[j] == msg.sender) { revert YouAlreadyDisputedThisEvent();} // check to see if the message sender has altready disputed and if yes revert out
                     }
@@ -111,11 +113,9 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                     disputes[i].disputerTime.push(_disputerTime);
                     disputes[i].disputerReason.push(_disputerReason);
                     disputes[i].disputerEvidence.push(_disputerEvidence);
-                } else {
-                    newDispute = true;
                 } 
             }  // if no dispute has been raised for this item add a new dispute
-            if(newDispute == true) {
+            if(!existingDispute) {
                 disputes[disputeIndex].itemId = _itemId;
                 disputes[disputeIndex].shapshotId = TOKEN.getSnapshot();
                 disputes[disputeIndex].disputers.push(msg.sender);
@@ -160,7 +160,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                 existingDisputeVoter = true;
             }
         }
-        if (existingDisputeVoter == false){ 
+        if (!existingDisputeVoter){ 
             disputeToDecisions[_disputeId].voter.push(msg.sender);
             disputeToDecisions[_disputeId].decision.push(_choice);
             if(voterCount == 0) {
@@ -173,7 +173,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                         existingVoter = true;
                     } 
                 }
-                if(existingVoter == false) {
+                if(!existingVoter) {
                     voterToBallance[voterCount].voterAddress=msg.sender;
                     voterCount = voterCount + 1;
                 }
@@ -242,7 +242,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
                         disputeToDecisions[i].outcome = 2;
                     } else {
                         voteCount(i);
-                        if (disputeToDecisions[i].processingStatus == false) {
+                        if (!disputeToDecisions[i].processingStatus) {
                             disputeToDecisions[i].processingStatus = true;
                             if (disputeToDecisions[i].outcome == 1) {
                                 MARKET.changeStatus(disputes[i].itemId, 4); // in buyer's favour
@@ -281,7 +281,7 @@ contract NFTicketsArbitration is ReentrancyGuard, Ownable {
 
     function withdrawShare () public payable nonReentrant {
         //check that the msg sender is a voter
-        if(isVoter(msg.sender) != true) { revert NotEligible();}
+        if(!isVoter(msg.sender)) { revert NotEligible();}
         uint256 currentShare = 0;
         for (uint i = 0; i < voterCount; i++){
             if(voterToBallance[i].voterAddress == msg.sender) {
